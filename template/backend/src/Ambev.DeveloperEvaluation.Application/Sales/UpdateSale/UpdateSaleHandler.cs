@@ -1,7 +1,5 @@
-﻿using Ambev.DeveloperEvaluation.Application.Sales.RegisterSale;
-using Ambev.DeveloperEvaluation.Domain.Entities;
+﻿using Ambev.DeveloperEvaluation.Domain.Entities;
 using Ambev.DeveloperEvaluation.Domain.Repositories;
-using Ambev.DeveloperEvaluation.Domain.Validation;
 using AutoMapper;
 using CSharpFunctionalExtensions;
 using FluentValidation;
@@ -15,18 +13,15 @@ public class UpdateSaleHandler : IRequestHandler<UpdateSaleCommand, UpdateSaleRe
     private readonly IMapper _mapper;
     private readonly ISaleRepository _saleRepository;
     private readonly ISaleItemRepository _saleItemRepository;
-    private readonly ICustomerRepository _customerRepository;
 
     public UpdateSaleHandler(
         IMapper mapper,
         ISaleRepository saleRepository,
-        ISaleItemRepository saleItemRepository,
-        ICustomerRepository customerRepository)
+        ISaleItemRepository saleItemRepository)
     {
         _mapper = mapper;
         _saleRepository = saleRepository;
         _saleItemRepository = saleItemRepository;
-        _customerRepository = customerRepository;
     }
 
     public async Task<UpdateSaleResult> Handle(UpdateSaleCommand command, CancellationToken cancellationToken)
@@ -38,23 +33,20 @@ public class UpdateSaleHandler : IRequestHandler<UpdateSaleCommand, UpdateSaleRe
             if (!validationResult.IsValid)
                 throw new ValidationException(validationResult.Errors);
 
-            var customer = await _customerRepository.GetByIdAsync(command.CustomerId);
-            if (customer.HasNoValue)
+            var sale = await _saleRepository.GetByIdWithTrackingAsync(command.Id, cancellationToken);
+            if (sale.HasNoValue)
             {
-                throw new KeyNotFoundException($"Customer with ID {customer.Value.Id} not found");
+                throw new KeyNotFoundException($"Sale with ID {sale.Value.Id} not found");
             }
+            
+            // TODO: atualizar todos os dados ? 
+            var saleToUpdate = sale.Value;
+            saleToUpdate.SaleDate = command.SaleDate;
+            saleToUpdate.TotalAmount = command.TotalAmount;
+            saleToUpdate.IsCanceled = command.IsCanceled;
+            saleToUpdate.Branch = command.Branch;
 
-            var sale = _mapper.Map<Sale>(command);
-            sale.Customer = customer.Value;
-
-            var saleValidator = new SaleValidator();
-            var saleValidationResult = await saleValidator.ValidateAsync(sale, cancellationToken);
-            if (!saleValidationResult.IsValid)
-                throw new ValidationException(saleValidationResult.Errors);
-
-            var updatedSale = await _saleRepository.UpdateAsync(sale, cancellationToken);
-
-            var saleItens = (await _saleItemRepository.GetBySaleIdAsync(sale.Id, cancellationToken)).Value.ToList();
+            var saleItens = (await _saleItemRepository.GetBySaleIdAsync(saleToUpdate.Id, cancellationToken)).Value.ToList();
 
             var updatedItens = command.SaleItens;
             var updatedItemIds = updatedItens.Select(i => i.ItemId).ToList();
@@ -80,8 +72,8 @@ public class UpdateSaleHandler : IRequestHandler<UpdateSaleCommand, UpdateSaleRe
                 {
                     itemsToAdd.Add(new SaleItem
                     {
-                        SaleId = sale.Id,
-                        Sale = sale,
+                        SaleId = saleToUpdate.Id,
+                        Sale = saleToUpdate,
 
                         ItemId = updatedItem.ItemId,
 
@@ -90,6 +82,8 @@ public class UpdateSaleHandler : IRequestHandler<UpdateSaleCommand, UpdateSaleRe
                     });
                 }
             }
+
+            await _saleRepository.UpdateAsync(saleToUpdate, cancellationToken);
 
             if (itemsToUpdate.Count > 0)
             {

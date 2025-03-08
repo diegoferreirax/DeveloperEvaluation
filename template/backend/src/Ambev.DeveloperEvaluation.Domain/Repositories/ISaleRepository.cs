@@ -39,4 +39,12 @@ public interface ISaleRepository
     /// <param name="cancellationToken">Cancellation token</param>
     /// <returns>The sale if found, Maybe.None otherwise</returns>
     Task<Maybe<Sale>> UpdateAsync(Sale sale, CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// Retrieves a sale by their unique identifier
+    /// </summary>
+    /// <param name="id">The unique identifier of the sale</param>
+    /// <param name="cancellationToken">Cancellation token</param>
+    /// <returns>The sale if found, Maybe otherwise</returns>
+    Task<Maybe<Sale>> GetByIdWithTrackingAsync(Guid id, CancellationToken cancellationToken = default);
 }

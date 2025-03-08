@@ -46,6 +46,17 @@ public class SaleRepository : ISaleRepository
     }
 
     /// <summary>
+    /// Retrieves a sale by their unique identifier
+    /// </summary>
+    /// <param name="id">The unique identifier of the sale</param>
+    /// <param name="cancellationToken">Cancellation token</param>
+    /// <returns>The sale if found, Maybe otherwise</returns>
+    public async Task<Maybe<Sale>> GetByIdWithTrackingAsync(Guid id, CancellationToken cancellationToken = default)
+    {
+        return await _context.Sales.Include("Customer").FirstOrDefaultAsync(o => o.Id == id, cancellationToken);
+    }
+
+    /// <summary>
     /// Deletes a sale from the database
     /// </summary>
     /// <param name="id">The unique identifier of the sale to delete</param>
