@@ -3,10 +3,5 @@
 /// <summary>
 /// Response model for DeleteSale operation
 /// </summary>
-public class DeleteSaleResponse
-{
-    /// <summary>
-    /// Indicates whether the deletion was successful
-    /// </summary>
-    public bool Success { get; set; }
-}
+/// <param name="Success">Indicates whether the deletion was successful.</param>
+public record DeleteSaleResponse(bool Success);

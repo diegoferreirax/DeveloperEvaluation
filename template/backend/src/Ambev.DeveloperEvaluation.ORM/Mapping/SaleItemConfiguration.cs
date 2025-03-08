@@ -4,10 +4,6 @@ using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
 namespace Ambev.DeveloperEvaluation.ORM.Mapping;
 
-/*
- TODO: 
-    ver oq da pra melhorar
- */
 public class SaleItemConfiguration : IEntityTypeConfiguration<SaleItem>
 {
     public void Configure(EntityTypeBuilder<SaleItem> builder)

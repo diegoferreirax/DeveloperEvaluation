@@ -38,6 +38,6 @@ public class DeleteSaleHandler : IRequestHandler<DeleteSaleCommand, DeleteSaleRe
         if (!success)
             throw new KeyNotFoundException($"Sale with ID {request.Id} not found");
 
-        return new DeleteSaleResponse { Success = true };
+        return new DeleteSaleResponse(true);
     }
 }

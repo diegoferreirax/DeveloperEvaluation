@@ -1,7 +1,5 @@
 ﻿namespace Ambev.DeveloperEvaluation.WebApi.Features.Sales.RegisterSale;
 
-/* TODO: trocar responses e requests pra record */
-
 /// <summary>
 /// Represents the response returned after successfully registering a sale.
 /// </summary>

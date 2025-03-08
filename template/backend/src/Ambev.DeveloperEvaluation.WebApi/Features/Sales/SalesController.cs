@@ -67,7 +67,7 @@ public class SalesController : BaseController
     [ProducesResponseType(typeof(ApiResponse), StatusCodes.Status404NotFound)]
     public async Task<IActionResult> DeleteSale([FromRoute] Guid id, CancellationToken cancellationToken)
     {
-        var request = new DeleteSaleRequest { Id = id };
+        var request = new DeleteSaleRequest(id);
         var validator = new DeleteSaleRequestValidator();
         var validationResult = await validator.ValidateAsync(request, cancellationToken);
 

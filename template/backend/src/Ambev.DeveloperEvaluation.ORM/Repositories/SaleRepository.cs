@@ -46,7 +46,7 @@ public class SaleRepository : ISaleRepository
     }
 
     /// <summary>
-    /// Retrieves a sale by their unique identifier
+    /// Retrieves a sale by their unique identifier with ef core tracking
     /// </summary>
     /// <param name="id">The unique identifier of the sale</param>
     /// <param name="cancellationToken">Cancellation token</param>
