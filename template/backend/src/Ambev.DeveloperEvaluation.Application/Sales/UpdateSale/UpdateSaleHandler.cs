@@ -1,10 +1,12 @@
-﻿using Ambev.DeveloperEvaluation.Domain.Entities;
+﻿using Ambev.DeveloperEvaluation.Application.Sales.RegisterSale;
+using Ambev.DeveloperEvaluation.Domain.Entities;
 using Ambev.DeveloperEvaluation.Domain.Repositories;
 using Ambev.DeveloperEvaluation.Domain.Validation;
 using AutoMapper;
 using CSharpFunctionalExtensions;
 using FluentValidation;
 using MediatR;
+using System.Transactions;
 
 namespace Ambev.DeveloperEvaluation.Application.Sales.UpdateSale;
 
@@ -29,74 +31,78 @@ public class UpdateSaleHandler : IRequestHandler<UpdateSaleCommand, UpdateSaleRe
 
     public async Task<UpdateSaleResult> Handle(UpdateSaleCommand command, CancellationToken cancellationToken)
     {
-        var validator = new UpdateSaleCommandValidator();
-        var validationResult = await validator.ValidateAsync(command, cancellationToken);
-        if (!validationResult.IsValid)
-            throw new ValidationException(validationResult.Errors);
-
-        var customer = await _customerRepository.GetByIdAsync(command.CustomerId);
-        if (customer.HasNoValue)
+        using (var tx = new TransactionScope(TransactionScopeOption.Required, TransactionScopeAsyncFlowOption.Enabled))
         {
-            throw new KeyNotFoundException($"Customer with ID {customer.Value.Id} not found");
-        }
+            var validator = new UpdateSaleCommandValidator();
+            var validationResult = await validator.ValidateAsync(command, cancellationToken);
+            if (!validationResult.IsValid)
+                throw new ValidationException(validationResult.Errors);
 
-        var sale = _mapper.Map<Sale>(command);
-        sale.Customer = customer.Value;
-
-        var saleValidator = new SaleValidator();
-        var saleValidationResult = await saleValidator.ValidateAsync(sale, cancellationToken);
-        if (!saleValidationResult.IsValid)
-            throw new ValidationException(saleValidationResult.Errors);
-
-        var updatedSale = await _saleRepository.UpdateAsync(sale, cancellationToken);
-
-        var saleItens = (await _saleItemRepository.GetBySaleIdAsync(sale.Id, cancellationToken)).Value.ToList();
-
-        var updatedItens = command.SaleItens;
-        var updatedItemIds = updatedItens.Select(i => i.ItemId).ToList();
-
-        var itemsToRemove = saleItens.Where(i => !updatedItemIds.Contains(i.Id)).ToArray();
-        if (itemsToRemove.Length > 0)
-        {
-            await _saleItemRepository.DeleteAsync(itemsToRemove, cancellationToken);
-        }
-
-        var itemsToUpdate = new List<SaleItem>();
-        var itemsToAdd = new List<SaleItem>();
-        foreach (var updatedItem in updatedItens)
-        {
-            var existingItem = saleItens.FirstOrDefault(i => i.Id == updatedItem.ItemId);
-            if (existingItem is not null) 
+            var customer = await _customerRepository.GetByIdAsync(command.CustomerId);
+            if (customer.HasNoValue)
             {
-                existingItem.Discount = updatedItem.Discount;
-                existingItem.Quantity = updatedItem.Quantity;
-                itemsToUpdate.Add(existingItem);
+                throw new KeyNotFoundException($"Customer with ID {customer.Value.Id} not found");
             }
-            else
+
+            var sale = _mapper.Map<Sale>(command);
+            sale.Customer = customer.Value;
+
+            var saleValidator = new SaleValidator();
+            var saleValidationResult = await saleValidator.ValidateAsync(sale, cancellationToken);
+            if (!saleValidationResult.IsValid)
+                throw new ValidationException(saleValidationResult.Errors);
+
+            var updatedSale = await _saleRepository.UpdateAsync(sale, cancellationToken);
+
+            var saleItens = (await _saleItemRepository.GetBySaleIdAsync(sale.Id, cancellationToken)).Value.ToList();
+
+            var updatedItens = command.SaleItens;
+            var updatedItemIds = updatedItens.Select(i => i.ItemId).ToList();
+
+            var itemsToRemove = saleItens.Where(i => !updatedItemIds.Contains(i.Id)).ToArray();
+            if (itemsToRemove.Length > 0)
             {
-                itemsToAdd.Add(new SaleItem
+                await _saleItemRepository.DeleteAsync(itemsToRemove, cancellationToken);
+            }
+
+            var itemsToUpdate = new List<SaleItem>();
+            var itemsToAdd = new List<SaleItem>();
+            foreach (var updatedItem in updatedItens)
+            {
+                var existingItem = saleItens.FirstOrDefault(i => i.Id == updatedItem.ItemId);
+                if (existingItem is not null)
                 {
-                    SaleId = sale.Id,
-                    Sale = sale,
+                    existingItem.Discount = updatedItem.Discount;
+                    existingItem.Quantity = updatedItem.Quantity;
+                    itemsToUpdate.Add(existingItem);
+                }
+                else
+                {
+                    itemsToAdd.Add(new SaleItem
+                    {
+                        SaleId = sale.Id,
+                        Sale = sale,
 
-                    ItemId = updatedItem.ItemId,
+                        ItemId = updatedItem.ItemId,
 
-                    Quantity = updatedItem.Quantity,
-                    Discount = updatedItem.Discount
-                });
+                        Quantity = updatedItem.Quantity,
+                        Discount = updatedItem.Discount
+                    });
+                }
             }
-        }
 
-        if (itemsToUpdate.Count > 0)
-        {
-            await _saleItemRepository.UpdateAsync(itemsToUpdate.ToArray(), cancellationToken);
-        }
+            if (itemsToUpdate.Count > 0)
+            {
+                await _saleItemRepository.UpdateAsync(itemsToUpdate.ToArray(), cancellationToken);
+            }
 
-        if (itemsToAdd.Count > 0)
-        {
-            await _saleItemRepository.RegisterSaleItensAsync(itemsToAdd.ToArray(), cancellationToken);
-        }
+            if (itemsToAdd.Count > 0)
+            {
+                await _saleItemRepository.RegisterSaleItensAsync(itemsToAdd.ToArray(), cancellationToken);
+            }
 
-        return new UpdateSaleResult();
+            tx.Complete();
+            return new UpdateSaleResult();
+        }
     }
 }

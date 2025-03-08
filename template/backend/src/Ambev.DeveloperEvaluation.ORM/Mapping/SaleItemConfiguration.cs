@@ -17,10 +17,10 @@ public class SaleItemConfiguration : IEntityTypeConfiguration<SaleItem>
         builder.HasKey(u => u.Id);
         builder.HasAlternateKey(a => new { a.SaleId, a.ItemId });
 
-        builder.Property(u => u.Id).HasColumnType("uuid").HasDefaultValueSql("gen_random_uuid()");
+        builder.Property(u => u.Id).HasColumnType("UUID").HasDefaultValueSql("GEN_RANDOM_UUID()");
 
         builder.Property(u => u.Quantity).IsRequired();
-        builder.Property(u => u.Discount).HasColumnType("numeric(7,2)");
+        builder.Property(u => u.Discount).HasColumnType("NUMERIC(5,2)");
 
         builder
             .HasOne(o => o.Sale)

@@ -6,8 +6,6 @@
 public class UpdateSaleRequest
 {
     public Guid Id { get; set; }
-    public Guid CustomerId { get; set; }
-    public int SaleNumber { get; set; }
     public DateTime SaleDate { get; set; }
     public decimal TotalAmount { get; set; }
     public bool IsCanceled { get; set; }

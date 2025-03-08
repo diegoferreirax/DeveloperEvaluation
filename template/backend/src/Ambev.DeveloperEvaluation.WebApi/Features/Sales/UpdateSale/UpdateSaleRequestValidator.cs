@@ -6,8 +6,6 @@ public class UpdateSaleRequestValidator : AbstractValidator<UpdateSaleRequest>
 {
     public UpdateSaleRequestValidator()
     {
-        RuleFor(user => user.CustomerId).NotNull().NotEmpty();
-        RuleFor(user => user.SaleNumber).GreaterThan(0);
         RuleFor(user => user.SaleDate).NotNull().NotEmpty();
         RuleFor(user => user.TotalAmount).GreaterThan(0);
         RuleFor(user => user.IsCanceled).NotNull();

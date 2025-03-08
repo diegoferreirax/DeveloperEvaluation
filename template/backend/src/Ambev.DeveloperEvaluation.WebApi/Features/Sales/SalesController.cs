@@ -67,7 +67,7 @@ public class SalesController : BaseController
         });
     }
 
-    [HttpPatch]
+    [HttpPut]
     public async Task<IActionResult> UpdateSale([FromBody] UpdateSaleRequest request, CancellationToken cancellationToken)
     {
         var validator = new UpdateSaleRequestValidator();
