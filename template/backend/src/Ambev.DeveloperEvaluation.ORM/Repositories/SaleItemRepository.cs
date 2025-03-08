@@ -1,5 +1,7 @@
 ﻿using Ambev.DeveloperEvaluation.Domain.Entities;
 using Ambev.DeveloperEvaluation.Domain.Repositories;
+using CSharpFunctionalExtensions;
+using Microsoft.EntityFrameworkCore;
 
 namespace Ambev.DeveloperEvaluation.ORM.Repositories;
 
@@ -20,7 +22,7 @@ public class SaleItemRepository : ISaleItemRepository
     }
 
     /// <summary>
-    /// Register a new saleItens in the database
+    /// Register a saleItens in the database
     /// </summary>
     /// <param name="saleItens">The saleItens to register</param>
     /// <param name="cancellationToken">Cancellation token</param>
@@ -30,5 +32,42 @@ public class SaleItemRepository : ISaleItemRepository
         await _context.SaleItens.AddRangeAsync(saleItens, cancellationToken);
         await _context.SaveChangesAsync(cancellationToken);
         return saleItens;
+    }
+
+    /// <summary>
+    /// Updates a saleItem from the database
+    /// </summary>
+    /// <param name="id">The unique identifier of the saleItem to update</param>
+    /// <param name="cancellationToken">Cancellation token</param>
+    /// <returns>True if the saleItem was updated, false if not found</returns>
+    public async Task<SaleItem[]> UpdateAsync(SaleItem[] saleItens, CancellationToken cancellationToken = default)
+    {
+        _context.SaleItens.UpdateRange(saleItens);
+        await _context.SaveChangesAsync(cancellationToken);
+        return saleItens;
+    }
+
+    /// <summary>
+    /// Deletes a saleItens from the database
+    /// </summary>
+    /// <param name="id">The unique identifier of the saleItens to delete</param>
+    /// <param name="cancellationToken">Cancellation token</param>
+    /// <returns>True if the saleItens was deleted, false if not found</returns>
+    public async Task<bool> DeleteAsync(SaleItem[] saleItems, CancellationToken cancellationToken = default)
+    {
+        _context.SaleItens.RemoveRange(saleItems);
+        await _context.SaveChangesAsync(cancellationToken);
+        return true;
+    }
+
+    /// <summary>
+    /// Retrieves a saleItens by their unique identifier
+    /// </summary>
+    /// <param name="id">The unique identifier of the saleItens</param>
+    /// <param name="cancellationToken">Cancellation token</param>
+    /// <returns>The saleItens if found, Maybe otherwise</returns>
+    public async Task<Maybe<SaleItem[]>> GetBySaleIdAsync(Guid saleId, CancellationToken cancellationToken = default)
+    {
+        return await _context.SaleItens.AsNoTracking().Where(s => s.SaleId == saleId).ToArrayAsync();
     }
 }

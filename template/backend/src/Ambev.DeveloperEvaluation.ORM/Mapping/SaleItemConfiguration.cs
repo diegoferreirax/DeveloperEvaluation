@@ -15,6 +15,8 @@ public class SaleItemConfiguration : IEntityTypeConfiguration<SaleItem>
         builder.ToTable("SaleItem");
 
         builder.HasKey(u => u.Id);
+        builder.HasAlternateKey(a => new { a.SaleId, a.ItemId });
+
         builder.Property(u => u.Id).HasColumnType("uuid").HasDefaultValueSql("gen_random_uuid()");
 
         builder.Property(u => u.Quantity).IsRequired();

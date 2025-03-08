@@ -1,4 +1,5 @@
 using Ambev.DeveloperEvaluation.Domain.Entities;
+using CSharpFunctionalExtensions;
 
 namespace Ambev.DeveloperEvaluation.Domain.Repositories;
 
@@ -14,4 +15,28 @@ public interface ISaleItemRepository
     /// <param name="cancellationToken">Cancellation token</param>
     /// <returns>The registered saleItem</returns>
     Task<SaleItem[]> RegisterSaleItensAsync(SaleItem[] saleItens, CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// Retrieves a saleItens by their unique identifier
+    /// </summary>
+    /// <param name="id">The unique identifier of the saleItens</param>
+    /// <param name="cancellationToken">Cancellation token</param>
+    /// <returns>The saleItens if found, Maybe otherwise</returns>
+    Task<Maybe<SaleItem[]>> GetBySaleIdAsync(Guid saleId, CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// Deletes a saleItens from the database
+    /// </summary>
+    /// <param name="id">The unique identifier of the saleItens to delete</param>
+    /// <param name="cancellationToken">Cancellation token</param>
+    /// <returns></returns>
+    Task<bool> DeleteAsync(SaleItem[] saleItems, CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// Updates a saleItem from the database
+    /// </summary>
+    /// <param name="id">The unique identifier of the saleItem to update</param>
+    /// <param name="cancellationToken">Cancellation token</param>
+    /// <returns>True if the saleItem was updated, false if not found</returns>
+    Task<SaleItem[]> UpdateAsync(SaleItem[] saleItens, CancellationToken cancellationToken = default);
 }

@@ -1,5 +1,6 @@
 ﻿using Ambev.DeveloperEvaluation.Domain.Entities;
 using Ambev.DeveloperEvaluation.Domain.Repositories;
+using CSharpFunctionalExtensions;
 using Microsoft.EntityFrameworkCore;
 
 namespace Ambev.DeveloperEvaluation.ORM.Repositories;
@@ -38,10 +39,10 @@ public class SaleRepository : ISaleRepository
     /// </summary>
     /// <param name="id">The unique identifier of the sale</param>
     /// <param name="cancellationToken">Cancellation token</param>
-    /// <returns>The sale if found, null otherwise</returns>
-    public async Task<Sale?> GetByIdAsync(Guid id, CancellationToken cancellationToken = default)
+    /// <returns>The sale if found, Maybe otherwise</returns>
+    public async Task<Maybe<Sale>> GetByIdAsync(Guid id, CancellationToken cancellationToken = default)
     {
-        return await _context.Sales.FirstOrDefaultAsync(o => o.Id == id, cancellationToken);
+        return await _context.Sales.Include("Customer").AsNoTracking().FirstOrDefaultAsync(o => o.Id == id, cancellationToken);
     }
 
     /// <summary>
@@ -53,11 +54,30 @@ public class SaleRepository : ISaleRepository
     public async Task<bool> DeleteAsync(Guid id, CancellationToken cancellationToken = default)
     {
         var sale = await GetByIdAsync(id, cancellationToken);
-        if (sale == null)
+        if (sale.HasNoValue)
             return false;
 
-        _context.Sales.Remove(sale);
+        _context.Sales.Remove(sale.Value);
         await _context.SaveChangesAsync(cancellationToken);
         return true;
+    }
+
+    /// <summary>
+    /// Updates a sale from the database
+    /// </summary>
+    /// <param name="id">The unique identifier of the sale to update</param>
+    /// <param name="cancellationToken">Cancellation token</param>
+    /// <returns>True if the sale was updated, false if not found</returns>
+    public async Task<Maybe<Sale>> UpdateAsync(Sale sale, CancellationToken cancellationToken = default)
+    {
+        var existSale = await GetByIdAsync(sale.Id, cancellationToken);
+        if (existSale.HasNoValue)
+            return Maybe.None;
+
+        _context.Sales.Update(sale);
+        _context.Entry(sale).State = EntityState.Modified;
+        await _context.SaveChangesAsync(cancellationToken);
+
+        return sale;
     }
 }
