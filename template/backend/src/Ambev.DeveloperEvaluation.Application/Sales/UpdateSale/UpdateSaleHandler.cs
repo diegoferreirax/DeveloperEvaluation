@@ -97,7 +97,6 @@ public class UpdateSaleHandler : IRequestHandler<UpdateSaleCommand, UpdateSaleRe
             await _saleItemRepository.RegisterSaleItensAsync(itemsToAdd.ToArray(), cancellationToken);
         }
 
-        var result = _mapper.Map<UpdateSaleResult>(updatedSale.Value);
-        return result;
+        return new UpdateSaleResult();
     }
 }
