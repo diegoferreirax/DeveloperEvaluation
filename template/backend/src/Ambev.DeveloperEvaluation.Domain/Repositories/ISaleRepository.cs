@@ -14,4 +14,20 @@ public interface ISaleRepository
     /// <param name="cancellationToken">Cancellation token</param>
     /// <returns>The registered sale</returns>
     Task<Sale> RegisterSaleAsync(Sale sale, CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// Retrieves a sale by their unique identifier
+    /// </summary>
+    /// <param name="id">The unique identifier of the sale</param>
+    /// <param name="cancellationToken">Cancellation token</param>
+    /// <returns>The sale if found, null otherwise</returns>
+    Task<Sale?> GetByIdAsync(Guid id, CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// Deletes a sale from the repository
+    /// </summary>
+    /// <param name="id">The unique identifier of the sale to delete</param>
+    /// <param name="cancellationToken">Cancellation token</param>
+    /// <returns>True if the sale was deleted, false if not found</returns>
+    Task<bool> DeleteAsync(Guid id, CancellationToken cancellationToken = default);
 }
