@@ -8,12 +8,21 @@ using System.Transactions;
 
 namespace Ambev.DeveloperEvaluation.Application.Sales.UpdateSale;
 
+/// <summary>
+/// Handler for processing UpdateSaleCommand requests
+/// </summary>
 public class UpdateSaleHandler : IRequestHandler<UpdateSaleCommand, UpdateSaleResult>
 {
     private readonly IMapper _mapper;
     private readonly ISaleRepository _saleRepository;
     private readonly ISaleItemRepository _saleItemRepository;
 
+    /// <summary>
+    /// Initializes a new instance of the UpdateSaleHandler class.
+    /// </summary>
+    /// <param name="mapper">The IMapper instance used for mapping objects.</param>
+    /// <param name="saleRepository">The ISaleRepository instance used for interacting with sales data.</param>
+    /// <param name="saleItemRepository">The ISaleItemRepository instance used for interacting with sale items data.</param>
     public UpdateSaleHandler(
         IMapper mapper,
         ISaleRepository saleRepository,
@@ -24,6 +33,12 @@ public class UpdateSaleHandler : IRequestHandler<UpdateSaleCommand, UpdateSaleRe
         _saleItemRepository = saleItemRepository;
     }
 
+    /// <summary>
+    /// Handles the UpdateSaleCommand instance.
+    /// </summary>
+    /// <param name="command">The UpdateSale command</param>
+    /// <param name="cancellationToken">Cancellation token</param>
+    /// <returns>An UpdateSaleResult of the sale update.</returns>
     public async Task<UpdateSaleResult> Handle(UpdateSaleCommand command, CancellationToken cancellationToken)
     {
         using (var tx = new TransactionScope(TransactionScopeOption.Required, TransactionScopeAsyncFlowOption.Enabled))
@@ -38,7 +53,7 @@ public class UpdateSaleHandler : IRequestHandler<UpdateSaleCommand, UpdateSaleRe
             {
                 throw new KeyNotFoundException($"Sale with ID {sale.Value.Id} not found");
             }
-            
+
             // TODO: atualizar todos os dados ? 
             var saleToUpdate = sale.Value;
             saleToUpdate.SaleDate = command.SaleDate;
@@ -46,12 +61,12 @@ public class UpdateSaleHandler : IRequestHandler<UpdateSaleCommand, UpdateSaleRe
             saleToUpdate.IsCanceled = command.IsCanceled;
             saleToUpdate.Branch = command.Branch;
 
-            var saleItens = (await _saleItemRepository.GetBySaleIdAsync(saleToUpdate.Id, cancellationToken)).Value.ToList();
+            var saleItems = (await _saleItemRepository.GetBySaleIdAsync(saleToUpdate.Id, cancellationToken)).Value.ToList();
 
-            var updatedItens = command.SaleItens;
-            var updatedItemIds = updatedItens.Select(i => i.ItemId).ToList();
+            var updatedItems = command.SaleItens;
+            var updatedItemIds = updatedItems.Select(i => i.ItemId).ToList();
 
-            var itemsToRemove = saleItens.Where(i => !updatedItemIds.Contains(i.Id)).ToArray();
+            var itemsToRemove = saleItems.Where(i => !updatedItemIds.Contains(i.Id)).ToArray();
             if (itemsToRemove.Length > 0)
             {
                 await _saleItemRepository.DeleteAsync(itemsToRemove, cancellationToken);
@@ -59,9 +74,9 @@ public class UpdateSaleHandler : IRequestHandler<UpdateSaleCommand, UpdateSaleRe
 
             var itemsToUpdate = new List<SaleItem>();
             var itemsToAdd = new List<SaleItem>();
-            foreach (var updatedItem in updatedItens)
+            foreach (var updatedItem in updatedItems)
             {
-                var existingItem = saleItens.FirstOrDefault(i => i.Id == updatedItem.ItemId);
+                var existingItem = saleItems.FirstOrDefault(i => i.Id == updatedItem.ItemId);
                 if (existingItem is not null)
                 {
                     existingItem.Discount = updatedItem.Discount;

@@ -78,17 +78,10 @@ public class SaleRepository : ISaleRepository
     /// </summary>
     /// <param name="id">The unique identifier of the sale to update</param>
     /// <param name="cancellationToken">Cancellation token</param>
-    /// <returns>True if the sale was updated, false if not found</returns>
-    public async Task<Maybe<Sale>> UpdateAsync(Sale sale, CancellationToken cancellationToken = default)
+    public async Task UpdateAsync(Sale sale, CancellationToken cancellationToken = default)
     {
-        var existSale = await GetByIdAsync(sale.Id, cancellationToken);
-        if (existSale.HasNoValue)
-            return Maybe.None;
-
         _context.Sales.Update(sale);
         _context.Entry(sale).State = EntityState.Modified;
         await _context.SaveChangesAsync(cancellationToken);
-
-        return sale;
     }
 }

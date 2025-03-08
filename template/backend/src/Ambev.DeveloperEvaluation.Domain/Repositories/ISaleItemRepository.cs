@@ -14,7 +14,7 @@ public interface ISaleItemRepository
     /// <param name="saleItem">The saleItem to register</param>
     /// <param name="cancellationToken">Cancellation token</param>
     /// <returns>The registered saleItem</returns>
-    Task<SaleItem[]> RegisterSaleItensAsync(SaleItem[] saleItens, CancellationToken cancellationToken = default);
+    Task RegisterSaleItensAsync(SaleItem[] saleItens, CancellationToken cancellationToken = default);
 
     /// <summary>
     /// Retrieves a saleItens by their unique identifier
@@ -37,6 +37,5 @@ public interface ISaleItemRepository
     /// </summary>
     /// <param name="id">The unique identifier of the saleItem to update</param>
     /// <param name="cancellationToken">Cancellation token</param>
-    /// <returns>True if the saleItem was updated, false if not found</returns>
-    Task<SaleItem[]> UpdateAsync(SaleItem[] saleItens, CancellationToken cancellationToken = default);
+    Task UpdateAsync(SaleItem[] saleItens, CancellationToken cancellationToken = default);
 }

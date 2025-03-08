@@ -8,6 +8,9 @@ using System.Transactions;
 
 namespace Ambev.DeveloperEvaluation.Application.Sales.RegisterSale;
 
+/// <summary>
+/// Handler for processing RegisterSaleCommand requests
+/// </summary>
 public class RegisterSaleHandler : IRequestHandler<RegisterSaleCommand, RegisterSaleResult>
 {
     private readonly IMapper _mapper;
@@ -15,6 +18,13 @@ public class RegisterSaleHandler : IRequestHandler<RegisterSaleCommand, Register
     private readonly ISaleItemRepository _saleItemRepository;
     private readonly ICustomerRepository _customerRepository;
 
+    /// <summary>
+    /// Initializes a new instance of RegisterSaleHandler
+    /// </summary>
+    /// <param name="mapper">An instance of IMapper.</param>
+    /// <param name="saleRepository">An instance of ISaleRepository.</param>
+    /// <param name="saleItemRepository">An instance of ISaleItemRepository.</param>
+    /// <param name="customerRepository">An instance of ICustomerRepository.</param>
     public RegisterSaleHandler(
         IMapper mapper,
         ISaleRepository saleRepository,
@@ -27,6 +37,12 @@ public class RegisterSaleHandler : IRequestHandler<RegisterSaleCommand, Register
         _customerRepository = customerRepository;
     }
 
+    /// <summary> 
+    /// Handles the RegisterSaleCommand request
+    /// </summary>
+    /// <param name="command">The RegisterSale command</param>
+    /// <param name="cancellationToken">Cancellation token</param>
+    /// <returns>A RegisterSaleResult containing the result of the sale registration.</returns>
     public async Task<RegisterSaleResult> Handle(RegisterSaleCommand command, CancellationToken cancellationToken)
     {
         using (var tx = new TransactionScope(TransactionScopeOption.Required, TransactionScopeAsyncFlowOption.Enabled))
@@ -60,7 +76,7 @@ public class RegisterSaleHandler : IRequestHandler<RegisterSaleCommand, Register
 
                 saleItens.Add(saleItem);
             }
-            var registerSaleItens = await _saleItemRepository.RegisterSaleItensAsync(saleItens.ToArray(), cancellationToken);
+            await _saleItemRepository.RegisterSaleItensAsync(saleItens.ToArray(), cancellationToken);
 
             var result = _mapper.Map<RegisterSaleResult>(registerSale);
 

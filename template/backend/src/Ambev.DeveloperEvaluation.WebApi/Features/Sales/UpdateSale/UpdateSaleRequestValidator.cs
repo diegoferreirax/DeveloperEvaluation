@@ -2,8 +2,14 @@
 
 namespace Ambev.DeveloperEvaluation.WebApi.Features.Sales.UpdateSale;
 
+/// <summary>
+/// Validator class for validating UpdateSaleRequest
+/// </summary>
 public class UpdateSaleRequestValidator : AbstractValidator<UpdateSaleRequest>
 {
+    /// <summary>
+    /// Defines validation rules for the UpdateSaleRequest
+    /// </summary>
     public UpdateSaleRequestValidator()
     {
         RuleFor(user => user.SaleDate).NotNull().NotEmpty();

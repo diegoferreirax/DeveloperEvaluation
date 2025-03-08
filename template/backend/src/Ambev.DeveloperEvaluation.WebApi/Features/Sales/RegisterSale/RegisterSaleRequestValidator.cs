@@ -2,8 +2,14 @@
 
 namespace Ambev.DeveloperEvaluation.WebApi.Features.Sales.RegisterSale;
 
+/// <summary>
+/// Validator class for validating RegisterSaleRequest.
+/// </summary>
 public class RegisterSaleRequestValidator : AbstractValidator<RegisterSaleRequest>
 {
+    /// <summary>
+    /// Defines validation rules for the RegisterSaleRequest.
+    /// </summary>
     public RegisterSaleRequestValidator()
     {
         RuleFor(user => user.CustomerId).NotNull().NotEmpty();

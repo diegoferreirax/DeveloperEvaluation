@@ -27,11 +27,10 @@ public class SaleItemRepository : ISaleItemRepository
     /// <param name="saleItens">The saleItens to register</param>
     /// <param name="cancellationToken">Cancellation token</param>
     /// <returns>The registered saleItens</returns>
-    public async Task<SaleItem[]> RegisterSaleItensAsync(SaleItem[] saleItens, CancellationToken cancellationToken = default)
+    public async Task RegisterSaleItensAsync(SaleItem[] saleItens, CancellationToken cancellationToken = default)
     {
         await _context.SaleItens.AddRangeAsync(saleItens, cancellationToken);
         await _context.SaveChangesAsync(cancellationToken);
-        return saleItens;
     }
 
     /// <summary>
@@ -39,12 +38,10 @@ public class SaleItemRepository : ISaleItemRepository
     /// </summary>
     /// <param name="id">The unique identifier of the saleItem to update</param>
     /// <param name="cancellationToken">Cancellation token</param>
-    /// <returns>True if the saleItem was updated, false if not found</returns>
-    public async Task<SaleItem[]> UpdateAsync(SaleItem[] saleItens, CancellationToken cancellationToken = default)
+    public async Task UpdateAsync(SaleItem[] saleItens, CancellationToken cancellationToken = default)
     {
         _context.SaleItens.UpdateRange(saleItens);
         await _context.SaveChangesAsync(cancellationToken);
-        return saleItens;
     }
 
     /// <summary>

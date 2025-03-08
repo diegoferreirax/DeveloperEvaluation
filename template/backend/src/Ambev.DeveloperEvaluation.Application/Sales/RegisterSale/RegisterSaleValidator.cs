@@ -2,8 +2,24 @@
 
 namespace Ambev.DeveloperEvaluation.Application.Sales.RegisterSale;
 
+/// <summary>
+/// Validator for the RegisterSaleCommand.
+/// Ensures that all required fields are properly filled and meet the validation criteria.
+/// </summary>
 public class RegisterSaleCommandValidator : AbstractValidator<RegisterSaleCommand>
 {
+    /// <summary>
+    /// Initializes a new instance of the RegisterSaleCommandValidator.
+    /// 
+    /// Validation rules:
+    /// - CustomerId must not be null or empty.
+    /// - SaleNumber must be greater than zero.
+    /// - SaleDate must not be null or empty.
+    /// - TotalAmount must be greater than zero.
+    /// - IsCanceled must not be null.
+    /// - Branch must not be null or empty.
+    /// - SaleItens must not be null or empty.
+    /// </summary>
     public RegisterSaleCommandValidator()
     {
         RuleFor(user => user.CustomerId).NotNull().NotEmpty();

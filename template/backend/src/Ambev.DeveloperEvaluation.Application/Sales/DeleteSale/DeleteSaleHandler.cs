@@ -5,17 +5,27 @@ using MediatR;
 namespace Ambev.DeveloperEvaluation.Application.Sales.DeleteSale;
 
 /// <summary>
-/// Command for deleting a sale
+/// Handler for processing DeleteSaleCommand requests
 /// </summary>
 public class DeleteSaleHandler : IRequestHandler<DeleteSaleCommand, DeleteSaleResponse>
 {
     private readonly ISaleRepository _saleRepository;
 
+    /// <summary>
+    /// Initializes a new instance of DeleteSaleHandler.
+    /// </summary>
+    /// <param name="saleRepository">The ISaleRepository instance</param>
     public DeleteSaleHandler(ISaleRepository saleRepository)
     {
         _saleRepository = saleRepository;
     }
 
+    /// <summary>
+    /// Handles the DeleteSaleCommand request
+    /// </summary>
+    /// <param name="request">The DeleteSale command</param>
+    /// <param name="cancellationToken">Cancellation token</param>
+    /// <returns>The deleted sale details</returns>
     public async Task<DeleteSaleResponse> Handle(DeleteSaleCommand request, CancellationToken cancellationToken)
     {
         var validator = new DeleteSaleCommandValidator();

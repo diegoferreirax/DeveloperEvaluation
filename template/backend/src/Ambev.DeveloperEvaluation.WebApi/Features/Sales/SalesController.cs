@@ -27,7 +27,15 @@ public class SalesController : BaseController
         _mapper = mapper;
     }
 
+    /// <summary>
+    /// Registers a new sale by processing the provided RegisterSaleRequest.
+    /// </summary>
+    /// <param name="request">The RegisterSaleRequest containing the data for the new sale to be registered.</param>
+    /// <param name="cancellationToken">Cancellation token</param>
+    /// <returns>An IActionResult representing the outcome of the operation.</returns>
     [HttpPost]
+    [ProducesResponseType(typeof(ApiResponseWithData<RegisterSaleRequest>), StatusCodes.Status201Created)]
+    [ProducesResponseType(typeof(ApiResponse), StatusCodes.Status400BadRequest)]
     public async Task<IActionResult> RegisterSale([FromBody] RegisterSaleRequest request, CancellationToken cancellationToken)
     {
         var validator = new RegisterSaleRequestValidator();
@@ -42,12 +50,21 @@ public class SalesController : BaseController
         return Created(string.Empty, new ApiResponseWithData<RegisterSaleResponse>
         {
             Success = true,
-            Message = "Sale registred successfully",
+            Message = "Sale registered successfully",
             Data = _mapper.Map<RegisterSaleResponse>(response)
         });
     }
 
+    /// <summary>
+    /// Deletes a sale identified by the provided <paramref name="id"/>.
+    /// </summary>
+    /// <param name="id">The unique identifier of the sale to be deleted.</param>
+    /// <param name="cancellationToken">Cancellation token</param>
+    /// <returns>An IActionResult representing the outcome of the deletion operation.</returns>
     [HttpDelete("{id}")]
+    [ProducesResponseType(typeof(ApiResponse), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(ApiResponse), StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(typeof(ApiResponse), StatusCodes.Status404NotFound)]
     public async Task<IActionResult> DeleteSale([FromRoute] Guid id, CancellationToken cancellationToken)
     {
         var request = new DeleteSaleRequest { Id = id };
@@ -67,7 +84,16 @@ public class SalesController : BaseController
         });
     }
 
+    /// <summary>
+    /// Updates an existing sale with the provided details in the <paramref name="request"/>.
+    /// </summary>
+    /// <param name="request">The UpdateSaleRequest containing the updated data for the sale.</param>
+    /// <param name="cancellationToken">Cancellation token</param>
+    /// <returns>An IActionResult representing the outcome of the update operation.</returns>
     [HttpPut]
+    [ProducesResponseType(typeof(ApiResponse), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(ApiResponse), StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(typeof(ApiResponse), StatusCodes.Status404NotFound)]
     public async Task<IActionResult> UpdateSale([FromBody] UpdateSaleRequest request, CancellationToken cancellationToken)
     {
         var validator = new UpdateSaleRequestValidator();
