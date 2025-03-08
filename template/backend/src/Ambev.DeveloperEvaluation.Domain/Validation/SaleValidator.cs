@@ -1,10 +1,11 @@
-﻿using FluentValidation;
+﻿using Ambev.DeveloperEvaluation.Domain.Entities;
+using FluentValidation;
 
-namespace Ambev.DeveloperEvaluation.WebApi.Features.Sales.RegisterSale;
+namespace Ambev.DeveloperEvaluation.Domain.Validation;
 
-public class RegisterSaleRequestValidator : AbstractValidator<RegisterSaleRequest>
+public class SaleValidator : AbstractValidator<Sale>
 {
-    public RegisterSaleRequestValidator()
+    public SaleValidator()
     {
         RuleFor(user => user.CustomerId).NotNull().NotEmpty();
         RuleFor(user => user.SaleNumber).GreaterThan(0);
@@ -12,6 +13,6 @@ public class RegisterSaleRequestValidator : AbstractValidator<RegisterSaleReques
         RuleFor(user => user.TotalAmount).GreaterThan(0);
         RuleFor(user => user.IsCanceled).NotNull();
         RuleFor(user => user.Branch).NotNull().NotEmpty();
-        RuleFor(user => user.SaleItens).NotNull().NotEmpty();
+        RuleFor(user => user.Customer).NotNull();
     }
 }

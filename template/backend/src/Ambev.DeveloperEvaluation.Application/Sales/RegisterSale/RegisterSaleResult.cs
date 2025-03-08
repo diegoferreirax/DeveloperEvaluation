@@ -8,4 +8,5 @@ namespace Ambev.DeveloperEvaluation.Application.Sales.RegisterSale;
 
 public class RegisterSaleResult
 {
+    public int SaleNumber { get; set; }
 }

@@ -1,6 +1,4 @@
-﻿using Ambev.DeveloperEvaluation.Domain.Enums;
-
-namespace Ambev.DeveloperEvaluation.WebApi.Features.Sales.RegisterSale;
+﻿namespace Ambev.DeveloperEvaluation.WebApi.Features.Sales.RegisterSale;
 
 /// <summary>
 /// Represents a request to register a new sale in the system.
@@ -17,6 +15,8 @@ public class RegisterSaleRequest
     public RegisterSaleItemRequest[] SaleItens { get; set; }
 }
 
+
+// TODO: validar saleitem
 public class RegisterSaleItemRequest
 {
     public Guid ItemId { get; set; }

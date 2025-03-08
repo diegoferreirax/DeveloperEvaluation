@@ -1,10 +1,5 @@
 ﻿using Ambev.DeveloperEvaluation.Common.Validation;
 using MediatR;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Ambev.DeveloperEvaluation.Application.Sales.RegisterSale;
 
@@ -19,16 +14,16 @@ public class RegisterSaleCommand : IRequest<RegisterSaleResult>
 
     public RegisterSaleItemCommand[] SaleItens { get; set; }
 
-    //public ValidationResultDetail Validate()
-    //{
-    //    var validator = new CreateUserCommandValidator();
-    //    var result = validator.Validate(this);
-    //    return new ValidationResultDetail
-    //    {
-    //        IsValid = result.IsValid,
-    //        Errors = result.Errors.Select(o => (ValidationErrorDetail)o)
-    //    };
-    //}
+    public ValidationResultDetail Validate()
+    {
+        var validator = new RegisterSaleCommandValidator();
+        var result = validator.Validate(this);
+        return new ValidationResultDetail
+        {
+            IsValid = result.IsValid,
+            Errors = result.Errors.Select(o => (ValidationErrorDetail)o)
+        };
+    }
 }
 
 public class RegisterSaleItemCommand

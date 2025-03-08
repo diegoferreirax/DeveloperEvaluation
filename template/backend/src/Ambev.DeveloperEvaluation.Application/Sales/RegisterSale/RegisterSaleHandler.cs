@@ -1,5 +1,6 @@
 ﻿using Ambev.DeveloperEvaluation.Domain.Entities;
 using Ambev.DeveloperEvaluation.Domain.Repositories;
+using Ambev.DeveloperEvaluation.Domain.Validation;
 using AutoMapper;
 using FluentValidation;
 using MediatR;
@@ -26,14 +27,16 @@ public class RegisterSaleHandler : IRequestHandler<RegisterSaleCommand, Register
     {
         var validator = new RegisterSaleCommandValidator();
         var validationResult = await validator.ValidateAsync(command, cancellationToken);
-
         if (!validationResult.IsValid)
             throw new ValidationException(validationResult.Errors);
 
         var sale = _mapper.Map<Sale>(command);
+        var saleValidator = new SaleValidator();
+        var saleValidationResult = await saleValidator.ValidateAsync(sale, cancellationToken);
+        if (!saleValidationResult.IsValid)
+            throw new ValidationException(saleValidationResult.Errors);
+
         var registerSale = await _saleRepository.RegisterSaleAsync(sale, cancellationToken);
-
-
 
         var saleItens = new List<SaleItem>();
         foreach (var saleItemCommand in command.SaleItens)
@@ -44,8 +47,6 @@ public class RegisterSaleHandler : IRequestHandler<RegisterSaleCommand, Register
             saleItens.Add(saleItem);
         }
         var registerSaleItens = await _saleItemRepository.RegisterSaleItensAsync(saleItens.ToArray(), cancellationToken);
-
-
 
         var result = _mapper.Map<RegisterSaleResult>(registerSale);
         return result;
