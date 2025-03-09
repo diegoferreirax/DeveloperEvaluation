@@ -13,8 +13,8 @@ public interface ISaleRepository
     /// </summary>
     /// <param name="sale">The sale to register</param>
     /// <param name="cancellationToken">Cancellation token</param>
-    /// <returns>The registered sale</returns>
-    Task<Sale> RegisterSaleAsync(Sale sale, CancellationToken cancellationToken = default);
+    /// <returns>The registered sale Id</returns>
+    Task<Guid> RegisterSaleAsync(Sale sale, CancellationToken cancellationToken = default);
 
     /// <summary>
     /// Retrieves a sale by their unique identifier

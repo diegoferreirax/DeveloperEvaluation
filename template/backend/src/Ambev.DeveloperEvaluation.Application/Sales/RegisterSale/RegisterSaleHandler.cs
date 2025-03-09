@@ -66,19 +66,19 @@ public class RegisterSaleHandler : IRequestHandler<RegisterSaleCommand, Register
             if (!saleValidationResult.IsValid)
                 throw new ValidationException(saleValidationResult.Errors);
 
-            var registerSale = await _saleRepository.RegisterSaleAsync(sale, cancellationToken);
+            var saleId = await _saleRepository.RegisterSaleAsync(sale, cancellationToken);
 
             var saleItens = new List<SaleItem>();
             foreach (var saleItemCommand in command.SaleItens)
             {
                 var saleItem = _mapper.Map<SaleItem>(saleItemCommand);
-                saleItem.SaleId = sale.Id;
+                saleItem.SaleId = saleId;
 
                 saleItens.Add(saleItem);
             }
             await _saleItemRepository.RegisterSaleItensAsync(saleItens.ToArray(), cancellationToken);
 
-            var result = _mapper.Map<RegisterSaleResult>(registerSale);
+            var result = _mapper.Map<RegisterSaleResult>(saleId);
 
             tx.Complete();
             return result;

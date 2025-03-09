@@ -27,11 +27,11 @@ public class SaleRepository : ISaleRepository
     /// <param name="sale">The sale to register</param>
     /// <param name="cancellationToken">Cancellation token</param>
     /// <returns>The registered sale</returns>
-    public async Task<Sale> RegisterSaleAsync(Sale sale, CancellationToken cancellationToken = default)
+    public async Task<Guid> RegisterSaleAsync(Sale sale, CancellationToken cancellationToken = default)
     {
         await _context.Sales.AddAsync(sale, cancellationToken);
         await _context.SaveChangesAsync(cancellationToken);
-        return sale;
+        return sale.Id;
     }
 
     /// <summary>

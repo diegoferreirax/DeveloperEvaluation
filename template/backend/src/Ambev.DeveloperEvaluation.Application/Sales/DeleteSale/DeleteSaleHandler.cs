@@ -23,20 +23,20 @@ public class DeleteSaleHandler : IRequestHandler<DeleteSaleCommand, DeleteSaleRe
     /// <summary>
     /// Handles the DeleteSaleCommand request
     /// </summary>
-    /// <param name="request">The DeleteSale command</param>
+    /// <param name="command">The DeleteSale command</param>
     /// <param name="cancellationToken">Cancellation token</param>
     /// <returns>The deleted sale details</returns>
-    public async Task<DeleteSaleResponse> Handle(DeleteSaleCommand request, CancellationToken cancellationToken)
+    public async Task<DeleteSaleResponse> Handle(DeleteSaleCommand command, CancellationToken cancellationToken)
     {
         var validator = new DeleteSaleCommandValidator();
-        var validationResult = await validator.ValidateAsync(request, cancellationToken);
+        var validationResult = await validator.ValidateAsync(command, cancellationToken);
 
         if (!validationResult.IsValid)
             throw new ValidationException(validationResult.Errors);
 
-        var success = await _saleRepository.DeleteAsync(request.Id, cancellationToken);
+        var success = await _saleRepository.DeleteAsync(command.Id, cancellationToken);
         if (!success)
-            throw new KeyNotFoundException($"Sale with ID {request.Id} not found");
+            throw new KeyNotFoundException($"Sale with ID {command.Id} not found");
 
         return new DeleteSaleResponse(true);
     }

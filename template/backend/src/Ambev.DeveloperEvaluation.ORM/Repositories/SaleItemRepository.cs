@@ -50,11 +50,10 @@ public class SaleItemRepository : ISaleItemRepository
     /// <param name="id">The unique identifier of the saleItens to delete</param>
     /// <param name="cancellationToken">Cancellation token</param>
     /// <returns>True if the saleItens was deleted, false if not found</returns>
-    public async Task<bool> DeleteAsync(SaleItem[] saleItems, CancellationToken cancellationToken = default)
+    public async Task DeleteAsync(SaleItem[] saleItems, CancellationToken cancellationToken = default)
     {
         _context.SaleItens.RemoveRange(saleItems);
         await _context.SaveChangesAsync(cancellationToken);
-        return true;
     }
 
     /// <summary>

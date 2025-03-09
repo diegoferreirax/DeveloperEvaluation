@@ -4,7 +4,7 @@ using AutoMapper;
 namespace Ambev.DeveloperEvaluation.Application.Sales.RegisterSale;
 
 /// <summary>
-/// AutoMapper for objects related to registering a sale.
+/// Profile for mapping between Application and API RegisterSale responses
 /// </summary>
 public class RegisterSaleProfile : Profile
 {
@@ -14,12 +14,12 @@ public class RegisterSaleProfile : Profile
     /// Mapping configurations:
     /// - Maps RegisterSaleCommand to Sale.
     /// - Maps RegisterSaleItemCommand to SaleItem.
-    /// - Maps Sale to RegisterSaleResult.
+    /// - Maps Guid to RegisterSaleResult.
     /// </summary>
     public RegisterSaleProfile()
     {
         CreateMap<RegisterSaleCommand, Sale>();
         CreateMap<RegisterSaleItemCommand, SaleItem>();
-        CreateMap<Sale, RegisterSaleResult>();
+        CreateMap<Guid, RegisterSaleResult>().ConstructUsing(id => new RegisterSaleResult(id));
     }
 }

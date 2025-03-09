@@ -30,7 +30,7 @@ public interface ISaleItemRepository
     /// <param name="id">The unique identifier of the saleItens to delete</param>
     /// <param name="cancellationToken">Cancellation token</param>
     /// <returns></returns>
-    Task<bool> DeleteAsync(SaleItem[] saleItems, CancellationToken cancellationToken = default);
+    Task DeleteAsync(SaleItem[] saleItems, CancellationToken cancellationToken = default);
 
     /// <summary>
     /// Updates a saleItem from the database
