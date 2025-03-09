@@ -12,7 +12,7 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace Ambev.DeveloperEvaluation.ORM.Migrations
 {
     [DbContext(typeof(DefaultContext))]
-    [Migration("20250307224617_AddSalesStructureTables")]
+    [Migration("20250309181449_AddSalesStructureTables")]
     partial class AddSalesStructureTables
     {
         /// <inheritdoc />
@@ -29,8 +29,8 @@ namespace Ambev.DeveloperEvaluation.ORM.Migrations
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("uuid")
-                        .HasDefaultValueSql("gen_random_uuid()");
+                        .HasColumnType("UUID")
+                        .HasDefaultValueSql("GEN_RANDOM_UUID()");
 
                     b.Property<string>("Name")
                         .IsRequired()
@@ -40,14 +40,26 @@ namespace Ambev.DeveloperEvaluation.ORM.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("Customer", (string)null);
+
+                    b.HasData(
+                        new
+                        {
+                            Id = new Guid("7bda9e04-f297-42f5-bd3b-c0fed49eacd4"),
+                            Name = "Alberto"
+                        },
+                        new
+                        {
+                            Id = new Guid("3b765f33-6d77-4da6-906f-511b1e2d009d"),
+                            Name = "Maria"
+                        });
                 });
 
             modelBuilder.Entity("Ambev.DeveloperEvaluation.Domain.Entities.Item", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("uuid")
-                        .HasDefaultValueSql("gen_random_uuid()");
+                        .HasColumnType("UUID")
+                        .HasDefaultValueSql("GEN_RANDOM_UUID()");
 
                     b.Property<string>("Product")
                         .IsRequired()
@@ -55,19 +67,51 @@ namespace Ambev.DeveloperEvaluation.ORM.Migrations
                         .HasColumnType("character varying(200)");
 
                     b.Property<decimal>("UnitPrice")
-                        .HasColumnType("numeric(7,2)");
+                        .HasColumnType("NUMERIC(10,2)");
 
                     b.HasKey("Id");
 
                     b.ToTable("Item", (string)null);
+
+                    b.HasData(
+                        new
+                        {
+                            Id = new Guid("5818a8f0-cd7c-4a5e-a7f2-a99507e9260d"),
+                            Product = "Brahma",
+                            UnitPrice = 2.00m
+                        },
+                        new
+                        {
+                            Id = new Guid("c06a6875-7737-4558-a013-6acfb4e705c7"),
+                            Product = "Patagônia IPA",
+                            UnitPrice = 2.00m
+                        },
+                        new
+                        {
+                            Id = new Guid("85c1e99d-4311-4fba-95c3-f327e34d3020"),
+                            Product = "Brahma DuploMaute",
+                            UnitPrice = 2.00m
+                        },
+                        new
+                        {
+                            Id = new Guid("5ad99f20-db03-4d06-b539-28ece3792303"),
+                            Product = "Skol",
+                            UnitPrice = 2.00m
+                        },
+                        new
+                        {
+                            Id = new Guid("2ccb7715-03fc-447f-9632-73a8a8bcc816"),
+                            Product = "Patagônia",
+                            UnitPrice = 2.00m
+                        });
                 });
 
             modelBuilder.Entity("Ambev.DeveloperEvaluation.Domain.Entities.Sale", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("uuid")
-                        .HasDefaultValueSql("gen_random_uuid()");
+                        .HasColumnType("UUID")
+                        .HasDefaultValueSql("GEN_RANDOM_UUID()");
 
                     b.Property<string>("Branch")
                         .IsRequired()
@@ -75,19 +119,19 @@ namespace Ambev.DeveloperEvaluation.ORM.Migrations
                         .HasColumnType("character varying(200)");
 
                     b.Property<Guid>("CustomerId")
-                        .HasColumnType("uuid");
+                        .HasColumnType("UUID");
 
                     b.Property<bool>("IsCanceled")
                         .HasColumnType("boolean");
 
                     b.Property<DateTime>("SaleDate")
-                        .HasColumnType("timestamp");
+                        .HasColumnType("TIMESTAMP");
 
                     b.Property<int>("SaleNumber")
                         .HasColumnType("integer");
 
                     b.Property<decimal>("TotalAmount")
-                        .HasColumnType("numeric(7,2)");
+                        .HasColumnType("NUMERIC(10,2)");
 
                     b.HasKey("Id");
 
@@ -102,26 +146,29 @@ namespace Ambev.DeveloperEvaluation.ORM.Migrations
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("uuid")
-                        .HasDefaultValueSql("gen_random_uuid()");
+                        .HasColumnType("UUID")
+                        .HasDefaultValueSql("GEN_RANDOM_UUID()");
 
                     b.Property<decimal>("Discount")
-                        .HasColumnType("numeric(7,2)");
+                        .HasColumnType("NUMERIC(5,2)");
 
                     b.Property<Guid>("ItemId")
-                        .HasColumnType("uuid");
+                        .HasColumnType("UUID");
 
                     b.Property<int>("Quantity")
                         .HasColumnType("integer");
 
                     b.Property<Guid>("SaleId")
-                        .HasColumnType("uuid");
+                        .HasColumnType("UUID");
+
+                    b.Property<decimal>("TotalItemAmount")
+                        .HasColumnType("NUMERIC(10,2)");
 
                     b.HasKey("Id");
 
-                    b.HasIndex("ItemId");
+                    b.HasAlternateKey("SaleId", "ItemId");
 
-                    b.HasIndex("SaleId");
+                    b.HasIndex("ItemId");
 
                     b.ToTable("SaleItem", (string)null);
                 });
