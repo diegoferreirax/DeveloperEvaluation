@@ -47,5 +47,5 @@ public class SaleItem : BaseEntity
     /// <summary>
     /// Gets sale's total item amount.
     /// </summary>
-    public decimal TotalItemAmount => Item.UnitPrice * Quantity - Discount;
+    public decimal TotalItemAmount { get; set; }
 }

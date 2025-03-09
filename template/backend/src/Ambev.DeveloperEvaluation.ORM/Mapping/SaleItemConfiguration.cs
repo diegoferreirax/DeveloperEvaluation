@@ -17,6 +17,7 @@ public class SaleItemConfiguration : IEntityTypeConfiguration<SaleItem>
 
         builder.Property(u => u.Quantity).IsRequired();
         builder.Property(u => u.Discount).HasColumnType("NUMERIC(5,2)");
+        builder.Property(u => u.TotalItemAmount).IsRequired().HasColumnType("NUMERIC(10,2)");
 
         builder
             .HasOne(o => o.Sale)

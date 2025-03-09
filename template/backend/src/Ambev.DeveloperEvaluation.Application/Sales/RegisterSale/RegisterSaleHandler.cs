@@ -17,6 +17,7 @@ public class RegisterSaleHandler : IRequestHandler<RegisterSaleCommand, Register
     private readonly ISaleRepository _saleRepository;
     private readonly ISaleItemRepository _saleItemRepository;
     private readonly ICustomerRepository _customerRepository;
+    private readonly IItemRepository _itemRepository;
 
     /// <summary>
     /// Initializes a new instance of RegisterSaleHandler
@@ -25,16 +26,19 @@ public class RegisterSaleHandler : IRequestHandler<RegisterSaleCommand, Register
     /// <param name="saleRepository">An instance of ISaleRepository.</param>
     /// <param name="saleItemRepository">An instance of ISaleItemRepository.</param>
     /// <param name="customerRepository">An instance of ICustomerRepository.</param>
+    /// <param name="itemRepository">An instance of IItemRepository.</param>
     public RegisterSaleHandler(
         IMapper mapper,
         ISaleRepository saleRepository,
         ISaleItemRepository saleItemRepository,
-        ICustomerRepository customerRepository)
+        ICustomerRepository customerRepository,
+        IItemRepository itemRepository)
     {
         _mapper = mapper;
         _saleRepository = saleRepository;
         _saleItemRepository = saleItemRepository;
         _customerRepository = customerRepository;
+        _itemRepository = itemRepository;
     }
 
     /// <summary> 
@@ -52,14 +56,37 @@ public class RegisterSaleHandler : IRequestHandler<RegisterSaleCommand, Register
             if (!validationResult.IsValid)
                 throw new ValidationException(validationResult.Errors);
 
+            // TODO: talvez armazenar os itens no cache e buscar os preços
+            var commandItemsIds = command.SaleItens.Select(i => i.ItemId).ToArray();
+            var itemsPrices = (await _itemRepository.GetItemsPriceByIdAsync(commandItemsIds)).Value;
+            if (!itemsPrices.Any())
+            {
+                throw new KeyNotFoundException($"Items not found");
+            }
+
             var customer = await _customerRepository.GetByIdAsync(command.CustomerId);
             if (customer.HasNoValue)
             {
                 throw new KeyNotFoundException($"Customer with ID {customer.Value.Id} not found");
             }
 
+            // TODO: aplicar regra desconto
+
+            var totalAmount = 0m;
+            foreach (var item in command.SaleItens)
+            {
+                decimal price;
+                var itemPrice = itemsPrices.TryGetValue(item.ItemId, out price);
+
+                var totalItemAmount = (price * item.Quantity) - item.Discount;
+
+                item.SetTotalItemAmount(totalItemAmount);
+                totalAmount += totalItemAmount;
+            }
+
             var sale = _mapper.Map<Sale>(command);
             sale.Customer = customer.Value;
+            sale.TotalAmount = totalAmount;
 
             var saleValidator = new SaleValidator();
             var saleValidationResult = await saleValidator.ValidateAsync(sale, cancellationToken);

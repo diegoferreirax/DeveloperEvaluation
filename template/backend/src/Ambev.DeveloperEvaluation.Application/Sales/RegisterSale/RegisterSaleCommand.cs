@@ -74,4 +74,14 @@ public class RegisterSaleItemCommand
     /// Discount amount applied to the item.
     /// </summary>
     public decimal Discount { get; set; }
+
+    /// <summary>
+    /// Gets sale's total item amount.
+    /// </summary>
+    public decimal TotalItemAmount { get; private set; }
+
+    public void SetTotalItemAmount(decimal totalItemAmount)
+    {
+        TotalItemAmount = totalItemAmount;
+    }
 }
