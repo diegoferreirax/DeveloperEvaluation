@@ -50,6 +50,9 @@ public class Sale : BaseEntity
     // TODO: poderia criar uma classe para filial
     public string Branch { get; set; }
 
+    // TODO: aplicar lista de saleItem sem redundância
+    // public string SaleItem[] { get; set; }
+
     /// <summary>
     /// Performs validation of the sale entity using the SaleValidator rules.
     /// </summary>
