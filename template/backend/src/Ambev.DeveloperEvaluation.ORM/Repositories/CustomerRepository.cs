@@ -29,6 +29,6 @@ public class CustomerRepository : ICustomerRepository
     /// <returns>The customer if found, Maybe otherwise</returns>
     public async Task<Maybe<Customer>> GetByIdAsync(Guid id, CancellationToken cancellationToken = default)
     {
-        return await _context.Customers.FirstOrDefaultAsync(o => o.Id == id, cancellationToken);
+        return await _context.Customers.FirstOrDefaultAsync(o => o.Id == id, cancellationToken).ConfigureAwait(false);
     }
 }

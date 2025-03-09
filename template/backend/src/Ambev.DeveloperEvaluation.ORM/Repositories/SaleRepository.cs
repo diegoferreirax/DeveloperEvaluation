@@ -30,7 +30,7 @@ public class SaleRepository : ISaleRepository
     public async Task<Guid> RegisterSaleAsync(Sale sale, CancellationToken cancellationToken = default)
     {
         await _context.Sales.AddAsync(sale, cancellationToken);
-        await _context.SaveChangesAsync(cancellationToken);
+        await _context.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
         return sale.Id;
     }
 
@@ -42,7 +42,7 @@ public class SaleRepository : ISaleRepository
     /// <returns>The sale if found, Maybe otherwise</returns>
     public async Task<Maybe<Sale>> GetByIdAsync(Guid id, CancellationToken cancellationToken = default)
     {
-        return await _context.Sales.Include("Customer").AsNoTracking().FirstOrDefaultAsync(o => o.Id == id, cancellationToken);
+        return await _context.Sales.Include("Customer").AsNoTracking().FirstOrDefaultAsync(o => o.Id == id, cancellationToken).ConfigureAwait(false);
     }
 
     /// <summary>
@@ -53,7 +53,7 @@ public class SaleRepository : ISaleRepository
     /// <returns>The sale if found, Maybe otherwise</returns>
     public async Task<Maybe<Sale>> GetByIdWithTrackingAsync(Guid id, CancellationToken cancellationToken = default)
     {
-        return await _context.Sales.Include("Customer").FirstOrDefaultAsync(o => o.Id == id, cancellationToken);
+        return await _context.Sales.Include("Customer").FirstOrDefaultAsync(o => o.Id == id, cancellationToken).ConfigureAwait(false);
     }
 
     /// <summary>
@@ -69,7 +69,7 @@ public class SaleRepository : ISaleRepository
             return false;
 
         _context.Sales.Remove(sale.Value);
-        await _context.SaveChangesAsync(cancellationToken);
+        await _context.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
         return true;
     }
 
@@ -82,6 +82,6 @@ public class SaleRepository : ISaleRepository
     {
         _context.Sales.Update(sale);
         _context.Entry(sale).State = EntityState.Modified;
-        await _context.SaveChangesAsync(cancellationToken);
+        await _context.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
     }
 }

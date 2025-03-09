@@ -30,7 +30,7 @@ public class SaleItemRepository : ISaleItemRepository
     public async Task RegisterSaleItensAsync(SaleItem[] saleItens, CancellationToken cancellationToken = default)
     {
         await _context.SaleItens.AddRangeAsync(saleItens, cancellationToken);
-        await _context.SaveChangesAsync(cancellationToken);
+        await _context.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
     }
 
     /// <summary>
@@ -41,7 +41,7 @@ public class SaleItemRepository : ISaleItemRepository
     public async Task UpdateAsync(SaleItem[] saleItens, CancellationToken cancellationToken = default)
     {
         _context.SaleItens.UpdateRange(saleItens);
-        await _context.SaveChangesAsync(cancellationToken);
+        await _context.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
     }
 
     /// <summary>
@@ -53,7 +53,7 @@ public class SaleItemRepository : ISaleItemRepository
     public async Task DeleteAsync(SaleItem[] saleItems, CancellationToken cancellationToken = default)
     {
         _context.SaleItens.RemoveRange(saleItems);
-        await _context.SaveChangesAsync(cancellationToken);
+        await _context.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
     }
 
     /// <summary>
@@ -64,6 +64,6 @@ public class SaleItemRepository : ISaleItemRepository
     /// <returns>The saleItens if found, Maybe otherwise</returns>
     public async Task<Maybe<SaleItem[]>> GetBySaleIdAsync(Guid saleId, CancellationToken cancellationToken = default)
     {
-        return await _context.SaleItens.AsNoTracking().Where(s => s.SaleId == saleId).ToArrayAsync();
+        return await _context.SaleItens.AsNoTracking().Where(s => s.SaleId == saleId).ToArrayAsync().ConfigureAwait(false);
     }
 }
