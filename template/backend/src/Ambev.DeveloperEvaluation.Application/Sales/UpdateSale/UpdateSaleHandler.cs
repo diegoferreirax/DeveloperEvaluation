@@ -47,6 +47,7 @@ public class UpdateSaleHandler : IRequestHandler<UpdateSaleCommand, UpdateSaleRe
     {
         using (var tx = new TransactionScope(TransactionScopeOption.Required, TransactionScopeAsyncFlowOption.Enabled))
         {
+            // TODO: metodo muito grande, ajustar
             var validator = new UpdateSaleCommandValidator();
             var validationResult = await validator.ValidateAsync(command, cancellationToken);
             if (!validationResult.IsValid)
