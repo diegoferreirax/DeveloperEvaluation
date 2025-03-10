@@ -1,5 +1,6 @@
 ﻿using Ambev.DeveloperEvaluation.Domain.Entities;
 using Ambev.DeveloperEvaluation.Domain.Repositories;
+using Ambev.DeveloperEvaluation.Domain.Strategies.Discount;
 using AutoMapper;
 using CSharpFunctionalExtensions;
 using FluentValidation;
@@ -16,6 +17,7 @@ public class UpdateSaleHandler : IRequestHandler<UpdateSaleCommand, UpdateSaleRe
     private readonly IMapper _mapper;
     private readonly ISaleRepository _saleRepository;
     private readonly ISaleItemRepository _saleItemRepository;
+    private readonly IItemRepository _itemRepository;
 
     /// <summary>
     /// Initializes a new instance of the UpdateSaleHandler class.
@@ -26,11 +28,13 @@ public class UpdateSaleHandler : IRequestHandler<UpdateSaleCommand, UpdateSaleRe
     public UpdateSaleHandler(
         IMapper mapper,
         ISaleRepository saleRepository,
-        ISaleItemRepository saleItemRepository)
+        ISaleItemRepository saleItemRepository,
+        IItemRepository itemRepository)
     {
         _mapper = mapper;
         _saleRepository = saleRepository;
         _saleItemRepository = saleItemRepository;
+        _itemRepository = itemRepository;
     }
 
     /// <summary>
@@ -48,6 +52,12 @@ public class UpdateSaleHandler : IRequestHandler<UpdateSaleCommand, UpdateSaleRe
             if (!validationResult.IsValid)
                 throw new ValidationException(validationResult.Errors);
 
+            bool hasItemWithMoreThan20 = command.SaleItens.Any(item => item.Quantity > 20);
+            if (hasItemWithMoreThan20)
+            {
+                throw new InvalidOperationException($"Item quantity is more then 20.");
+            }
+
             var sale = await _saleRepository.GetByIdWithTrackingAsync(command.Id, cancellationToken);
             if (sale.HasNoValue)
             {
@@ -57,7 +67,6 @@ public class UpdateSaleHandler : IRequestHandler<UpdateSaleCommand, UpdateSaleRe
             // TODO: atualizar todos os dados ? 
             var saleToUpdate = sale.Value;
             saleToUpdate.SaleDate = command.SaleDate;
-            saleToUpdate.TotalAmount = command.TotalAmount;
             saleToUpdate.IsCanceled = command.IsCanceled;
             saleToUpdate.Branch = command.Branch;
 
@@ -66,21 +75,46 @@ public class UpdateSaleHandler : IRequestHandler<UpdateSaleCommand, UpdateSaleRe
             var updatedItems = command.SaleItens;
             var updatedItemIds = updatedItems.Select(i => i.ItemId).ToList();
 
-            var itemsToRemove = saleItems.Where(i => !updatedItemIds.Contains(i.Id)).ToArray();
+            var itemsToRemove = saleItems.Where(i => !updatedItemIds.Contains(i.ItemId)).ToArray();
             if (itemsToRemove.Length > 0)
             {
                 await _saleItemRepository.DeleteAsync(itemsToRemove, cancellationToken);
             }
 
+            var itemsPrices = await GetItemsPrice(command);
+
+            var totalAmount = 0m;
             var itemsToUpdate = new List<SaleItem>();
             var itemsToAdd = new List<SaleItem>();
+
             foreach (var updatedItem in updatedItems)
             {
-                var existingItem = saleItems.FirstOrDefault(i => i.Id == updatedItem.ItemId);
+                decimal price;
+                itemsPrices.TryGetValue(updatedItem.ItemId, out price);
+
+                var discountStrategy = DiscountFactory.GetDiscountStrategy(updatedItem.Quantity);
+                if (discountStrategy.HasValue)
+                {
+                    updatedItem.Discount = discountStrategy.Value.GetPercent();
+
+                    var discountedPrice = discountStrategy.Value.GetDiscount(price, updatedItem.Quantity);
+                    var totalPriceWithDiscount = CalculateTotalPrice(discountedPrice, updatedItem.Quantity);
+                    updatedItem.SetTotalItemAmount(totalPriceWithDiscount);
+                    totalAmount += totalPriceWithDiscount;
+                }
+                else
+                {
+                    var totalPrice = CalculateTotalPrice(price, updatedItem.Quantity);
+                    updatedItem.SetTotalItemAmount(totalPrice);
+                    totalAmount += totalPrice;
+                }
+
+                var existingItem = saleItems.FirstOrDefault(i => i.ItemId == updatedItem.ItemId);
                 if (existingItem is not null)
                 {
                     existingItem.Discount = updatedItem.Discount;
                     existingItem.Quantity = updatedItem.Quantity;
+                    existingItem.TotalItemAmount = updatedItem.TotalItemAmount;
                     itemsToUpdate.Add(existingItem);
                 }
                 else
@@ -93,10 +127,13 @@ public class UpdateSaleHandler : IRequestHandler<UpdateSaleCommand, UpdateSaleRe
                         ItemId = updatedItem.ItemId,
 
                         Quantity = updatedItem.Quantity,
-                        Discount = updatedItem.Discount
+                        Discount = updatedItem.Discount,
+                        TotalItemAmount = updatedItem.TotalItemAmount
                     });
                 }
             }
+
+            saleToUpdate.TotalAmount = totalAmount;
 
             await _saleRepository.UpdateAsync(saleToUpdate, cancellationToken);
 
@@ -113,5 +150,23 @@ public class UpdateSaleHandler : IRequestHandler<UpdateSaleCommand, UpdateSaleRe
             tx.Complete();
             return new UpdateSaleResult();
         }
+    }
+
+    private async Task<IDictionary<Guid, decimal>> GetItemsPrice(UpdateSaleCommand command)
+    {
+        // TODO: talvez armazenar os itens no cache e buscar os preços
+        var commandItemsIds = command.SaleItens.Select(i => i.ItemId).ToArray();
+        var itemsPrices = (await _itemRepository.GetItemsPriceByIdAsync(commandItemsIds)).Value;
+        if (!itemsPrices.Any())
+        {
+            throw new KeyNotFoundException($"Items not found");
+        }
+        return itemsPrices;
+    }
+
+    private decimal CalculateTotalPrice(decimal price, int quantity)
+    {
+        // TODO: criar um serviço especifico para o calculo
+        return price * quantity;
     }
 }

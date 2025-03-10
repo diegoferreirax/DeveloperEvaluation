@@ -24,11 +24,6 @@ public class RegisterSaleCommand : IRequest<RegisterSaleResult>
     public DateTime SaleDate { get; set; }
 
     /// <summary>
-    /// Total sale amount.
-    /// </summary>
-    public decimal TotalAmount { get; set; }
-
-    /// <summary>
     /// Indicates whether the sale has been canceled.
     /// </summary>
     public bool IsCanceled { get; set; }

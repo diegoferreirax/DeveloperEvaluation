@@ -21,9 +21,30 @@ public class UpdateSaleCommandValidator : AbstractValidator<UpdateSaleCommand>
     public UpdateSaleCommandValidator()
     {
         RuleFor(user => user.SaleDate).NotNull().NotEmpty();
-        RuleFor(user => user.TotalAmount).GreaterThan(0);
         RuleFor(user => user.IsCanceled).NotNull();
         RuleFor(user => user.Branch).NotNull().NotEmpty();
-        RuleFor(user => user.SaleItens).NotNull().NotEmpty();
+        RuleForEach(user => user.SaleItens).SetValidator(new UpdateSaleItemCommandValidator());
+    }
+}
+
+
+/// <summary>
+/// Validator for the UpdateSaleItemCommand.
+/// Ensures that all required fields are properly filled and meet the validation criteria.
+/// </summary>
+public class UpdateSaleItemCommandValidator : AbstractValidator<UpdateSaleItemCommand>
+{
+    /// <summary>
+    /// Initializes a new instance of the UpdateSaleItemCommandValidator.
+    /// 
+    /// Validation rules:
+    /// - ItemId must not be null or empty.
+    /// - Quantity must be greater than zero.
+    /// </summary>
+    public UpdateSaleItemCommandValidator()
+    {
+        RuleFor(user => user.ItemId).NotNull().NotEmpty();
+        RuleFor(user => user.Quantity).GreaterThan(0);
+        RuleFor(user => user.Discount).GreaterThanOrEqualTo(0);
     }
 }

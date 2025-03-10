@@ -13,9 +13,23 @@ public class UpdateSaleRequestValidator : AbstractValidator<UpdateSaleRequest>
     public UpdateSaleRequestValidator()
     {
         RuleFor(user => user.SaleDate).NotNull().NotEmpty();
-        RuleFor(user => user.TotalAmount).GreaterThan(0);
         RuleFor(user => user.IsCanceled).NotNull();
         RuleFor(user => user.Branch).NotNull().NotEmpty();
-        RuleFor(user => user.SaleItens).NotNull().NotEmpty();
+        RuleForEach(user => user.SaleItens).SetValidator(new UpdateSaleItemRequestValidator());
+    }
+}
+
+/// <summary>
+/// Validator class for validating UpdateSaleItemRequest.
+/// </summary>
+public class UpdateSaleItemRequestValidator : AbstractValidator<UpdateSaleItemRequest>
+{
+    /// <summary>
+    /// Defines validation rules for the UpdateSaleItemRequest.
+    /// </summary>
+    public UpdateSaleItemRequestValidator()
+    {
+        RuleFor(user => user.ItemId).NotNull().NotEmpty();
+        RuleFor(user => user.Quantity).GreaterThan(0);
     }
 }

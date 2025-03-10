@@ -19,11 +19,6 @@ public class UpdateSaleCommand : IRequest<UpdateSaleResult>
     public DateTime SaleDate { get; set; }
 
     /// <summary>
-    /// Total sale amount.
-    /// </summary>
-    public decimal TotalAmount { get; set; }
-
-    /// <summary>
     /// Indicates whether the sale has been canceled.
     /// </summary>
     public bool IsCanceled { get; set; }
@@ -69,4 +64,14 @@ public class UpdateSaleItemCommand
     /// Discount amount applied to the item.
     /// </summary>
     public decimal Discount { get; set; }
+
+    /// <summary>
+    /// Gets sale's total item amount.
+    /// </summary>
+    public decimal TotalItemAmount { get; private set; }
+
+    public void SetTotalItemAmount(decimal totalItemAmount)
+    {
+        TotalItemAmount = totalItemAmount;
+    }
 }

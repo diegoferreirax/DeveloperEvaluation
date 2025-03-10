@@ -25,7 +25,6 @@ public class RegisterSaleCommandValidator : AbstractValidator<RegisterSaleComman
         RuleFor(user => user.CustomerId).NotNull().NotEmpty();
         RuleFor(user => user.SaleNumber).GreaterThan(0);
         RuleFor(user => user.SaleDate).NotNull().NotEmpty();
-        RuleFor(user => user.TotalAmount).GreaterThan(0);
         RuleFor(user => user.IsCanceled).NotNull();
         RuleFor(user => user.Branch).NotNull().NotEmpty();
         RuleForEach(user => user.SaleItens).SetValidator(new RegisterSaleItemCommandValidator());
@@ -49,6 +48,6 @@ public class RegisterSaleItemCommandValidator : AbstractValidator<RegisterSaleIt
     {
         RuleFor(user => user.ItemId).NotNull().NotEmpty();
         RuleFor(user => user.Quantity).GreaterThan(0);
-        RuleFor(user => user.Discount).GreaterThan(-0.1m);
+        RuleFor(user => user.Discount).GreaterThanOrEqualTo(0);
     }
 }

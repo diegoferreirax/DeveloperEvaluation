@@ -40,13 +40,14 @@ public class RegisterSaleHandlerTests
         _saleRepository.RegisterSaleAsync(Arg.Any<Sale>(), CancellationToken.None).Returns(saleId);
         _saleRepository.GetSaleExistByNumberAsync(Arg.Any<int>(), CancellationToken.None).Returns(false);
 
+        var totalAmount = 100.0m;
         var sale = new Sale
         {
             Id = saleId,
             CustomerId = command.CustomerId,
             SaleNumber = command.SaleNumber,
             SaleDate = command.SaleDate,
-            TotalAmount = command.TotalAmount,
+            TotalAmount = totalAmount,
             IsCanceled = command.IsCanceled,
             Branch = command.Branch,
         };
