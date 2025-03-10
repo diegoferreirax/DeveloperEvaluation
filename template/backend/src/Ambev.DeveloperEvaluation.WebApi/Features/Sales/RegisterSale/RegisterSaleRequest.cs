@@ -26,5 +26,4 @@ public record RegisterSaleRequest
 /// </summary>
 /// <param name="ItemId">The unique identifier of the item being registered for the sale.</param>
 /// <param name="Quantity">The quantity of the item being sold.</param>
-/// <param name="Discount">The discount applied to the item, if any.</param>
 public record RegisterSaleItemRequest(Guid ItemId, int Quantity);

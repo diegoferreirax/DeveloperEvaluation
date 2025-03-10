@@ -1,7 +1,9 @@
 ﻿using Ambev.DeveloperEvaluation.Domain.Entities;
 using Ambev.DeveloperEvaluation.Domain.Repositories;
+using Ambev.DeveloperEvaluation.Domain.Strategies.Discount;
 using Ambev.DeveloperEvaluation.Domain.Validation;
 using AutoMapper;
+using CSharpFunctionalExtensions;
 using FluentValidation;
 using MediatR;
 using System.Transactions;
@@ -59,15 +61,7 @@ public class RegisterSaleHandler : IRequestHandler<RegisterSaleCommand, Register
             var saleExist = await _saleRepository.GetSaleExistByNumberAsync(command.SaleNumber);
             if (saleExist)
             {
-                throw new InvalidOperationException($"Sale already exist.");
-            }
-
-            // TODO: talvez armazenar os itens no cache e buscar os preços
-            var commandItemsIds = command.SaleItens.Select(i => i.ItemId).ToArray();
-            var itemsPrices = (await _itemRepository.GetItemsPriceByIdAsync(commandItemsIds)).Value;
-            if (!itemsPrices.Any())
-            {
-                throw new KeyNotFoundException($"Items not found");
+                throw new InvalidOperationException($"Sale number already exist.");
             }
 
             var customer = await _customerRepository.GetByIdAsync(command.CustomerId);
@@ -82,37 +76,27 @@ public class RegisterSaleHandler : IRequestHandler<RegisterSaleCommand, Register
                 throw new InvalidOperationException($"Item quantity is more then 20.");
             }
 
-            // TODO: encapsular regra
-            foreach (var item in command.SaleItens)
-            {
-                if (item.Quantity >= 4 && item.Quantity <= 9)
-                {
-                    item.Discount = 0.10m;
-                }
-                else if (item.Quantity >= 10 && item.Quantity <= 20)
-                {
-                    item.Discount = 0.20m;
-                }
-            }
+            var itemsPrices = await GetItemsPrice(command);
 
-            // TODO: encapsular regra
             var totalAmount = 0m;
             foreach (var item in command.SaleItens)
             {
                 decimal price;
                 itemsPrices.TryGetValue(item.ItemId, out price);
 
-                var totalPrice = price * item.Quantity;
-
-                if (item.Discount > 0)
+                var discountStrategy = DiscountFactory.GetDiscountStrategy(item.Quantity);
+                if (discountStrategy.HasValue)
                 {
-                    var discountValue = totalPrice * item.Discount;
-                    var totalItemAmount = totalPrice - discountValue;
-                    item.SetTotalItemAmount(totalItemAmount);
-                    totalAmount += totalItemAmount;
+                    item.Discount = discountStrategy.Value.GetPercent();
+
+                    var discountedPrice = discountStrategy.Value.GetDiscount(price, item.Quantity);
+                    var totalPriceWithDiscount = CalculateTotalPrice(discountedPrice, item.Quantity);
+                    item.SetTotalItemAmount(totalPriceWithDiscount);
+                    totalAmount += totalPriceWithDiscount;
                 }
                 else
                 {
+                    var totalPrice = CalculateTotalPrice(price, item.Quantity);
                     item.SetTotalItemAmount(totalPrice);
                     totalAmount += totalPrice;
                 }
@@ -144,5 +128,23 @@ public class RegisterSaleHandler : IRequestHandler<RegisterSaleCommand, Register
             tx.Complete();
             return result;
         }
+    }
+
+    private async Task<IDictionary<Guid, decimal>> GetItemsPrice(RegisterSaleCommand command)
+    {
+        // TODO: talvez armazenar os itens no cache e buscar os preços
+        var commandItemsIds = command.SaleItens.Select(i => i.ItemId).ToArray();
+        var itemsPrices = (await _itemRepository.GetItemsPriceByIdAsync(commandItemsIds)).Value;
+        if (!itemsPrices.Any())
+        {
+            throw new KeyNotFoundException($"Items not found");
+        }
+        return itemsPrices;
+    }
+
+    private decimal CalculateTotalPrice(decimal price, int quantity)
+    {
+        // TODO: criar um serviço especifico para o calculo
+        return price * quantity;
     }
 }
