@@ -14,7 +14,11 @@ public class RegisterSaleProfile : Profile
     public RegisterSaleProfile()
     {
         CreateMap<RegisterSaleRequest, RegisterSaleCommand>();
-        CreateMap<RegisterSaleItemRequest, RegisterSaleItemCommand>().ForMember(com => com.TotalItemAmount, req => req.Ignore());
+
+        CreateMap<RegisterSaleItemRequest, RegisterSaleItemCommand>()
+            .ForMember(com => com.TotalItemAmount, req => req.Ignore())
+            .ForMember(com => com.Discount, req => req.Ignore());
+
         CreateMap<RegisterSaleResult, RegisterSaleResponse>();
     }
 }

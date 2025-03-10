@@ -46,6 +46,17 @@ public class SaleRepository : ISaleRepository
     }
 
     /// <summary>
+    /// Check if sale exist by saleNumber
+    /// </summary>
+    /// <param name="saleNumber">The number of the sale</param>
+    /// <param name="cancellationToken">Cancellation token</param>
+    /// <returns>The sale if exist, false otherwise</returns>
+    public async Task<bool> GetSaleExistByNumberAsync(int saleNumber, CancellationToken cancellationToken = default)
+    {
+        return await _context.Sales.Where(o => o.SaleNumber == saleNumber).AnyAsync().ConfigureAwait(false);
+    }
+
+    /// <summary>
     /// Retrieves a sale by their unique identifier with ef core tracking
     /// </summary>
     /// <param name="id">The unique identifier of the sale</param>

@@ -16,6 +16,7 @@ public class RegisterSaleHandlerTests
     private readonly ISaleRepository _saleRepository;
     private readonly ISaleItemRepository _saleItemRepository;
     private readonly ICustomerRepository _customerRepository;
+    private readonly IItemRepository _itemRepository;
     private readonly RegisterSaleHandler _handler;
 
     public RegisterSaleHandlerTests()
@@ -24,7 +25,8 @@ public class RegisterSaleHandlerTests
         _saleRepository = Substitute.For<ISaleRepository>();
         _saleItemRepository = Substitute.For<ISaleItemRepository>();
         _customerRepository = Substitute.For<ICustomerRepository>();
-        _handler = new RegisterSaleHandler(_mapper, _saleRepository, _saleItemRepository, _customerRepository);
+        _itemRepository = Substitute.For<IItemRepository>();
+        _handler = new RegisterSaleHandler(_mapper, _saleRepository, _saleItemRepository, _customerRepository, _itemRepository);
     }
 
     [Fact(DisplayName = "Given valid sale data When registering sale Then returns success response")]
@@ -36,6 +38,7 @@ public class RegisterSaleHandlerTests
 
         _customerRepository.GetByIdAsync(Arg.Any<Guid>(), CancellationToken.None).Returns(CustomerTestData.GenerateValidCustomer());
         _saleRepository.RegisterSaleAsync(Arg.Any<Sale>(), CancellationToken.None).Returns(saleId);
+        _saleRepository.GetSaleExistByNumberAsync(Arg.Any<int>(), CancellationToken.None).Returns(false);
 
         var sale = new Sale
         {
@@ -48,15 +51,23 @@ public class RegisterSaleHandlerTests
             Branch = command.Branch,
         };
 
+        var price = 10.0m;
+        var discount = 0m;
+        var itemsPrices = new Dictionary<Guid, decimal>();
+
         foreach (var item in command.SaleItens)
         {
+            itemsPrices.Add(item.ItemId, price);
+
             _mapper.Map<SaleItem>(item).Returns(new SaleItem
             {
                 ItemId = item.ItemId,
                 Quantity = item.Quantity,
-                Discount = item.Discount
+                Discount = discount
             });
         }
+
+        _itemRepository.GetItemsPriceByIdAsync(Arg.Any<Guid[]>(), CancellationToken.None).Returns(itemsPrices);
 
         _mapper.Map<Sale>(command).Returns(sale);
         _mapper.Map<RegisterSaleResult>(saleId).Returns(new RegisterSaleResult(saleId));

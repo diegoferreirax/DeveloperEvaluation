@@ -28,6 +28,27 @@ public class RegisterSaleCommandValidator : AbstractValidator<RegisterSaleComman
         RuleFor(user => user.TotalAmount).GreaterThan(0);
         RuleFor(user => user.IsCanceled).NotNull();
         RuleFor(user => user.Branch).NotNull().NotEmpty();
-        RuleFor(user => user.SaleItens).NotNull().NotEmpty();
+        RuleForEach(user => user.SaleItens).SetValidator(new RegisterSaleItemCommandValidator());
+    }
+}
+
+/// <summary>
+/// Validator for the RegisterSaleItemCommand.
+/// Ensures that all required fields are properly filled and meet the validation criteria.
+/// </summary>
+public class RegisterSaleItemCommandValidator : AbstractValidator<RegisterSaleItemCommand>
+{
+    /// <summary>
+    /// Initializes a new instance of the RegisterSaleItemCommandValidator.
+    /// 
+    /// Validation rules:
+    /// - ItemId must not be null or empty.
+    /// - Quantity must be greater than zero.
+    /// </summary>
+    public RegisterSaleItemCommandValidator()
+    {
+        RuleFor(user => user.ItemId).NotNull().NotEmpty();
+        RuleFor(user => user.Quantity).GreaterThan(0);
+        RuleFor(user => user.Discount).GreaterThan(-0.1m);
     }
 }

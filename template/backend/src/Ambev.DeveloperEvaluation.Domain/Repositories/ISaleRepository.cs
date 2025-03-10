@@ -25,6 +25,14 @@ public interface ISaleRepository
     Task<Maybe<Sale>> GetByIdAsync(Guid id, CancellationToken cancellationToken = default);
 
     /// <summary>
+    /// Check if sale exist by saleNumber
+    /// </summary>
+    /// <param name="saleNumber">The number of the sale</param>
+    /// <param name="cancellationToken">Cancellation token</param>
+    /// <returns>The sale if exist, false otherwise</returns>
+    Task<bool> GetSaleExistByNumberAsync(int saleNumber, CancellationToken cancellationToken = default);
+
+    /// <summary>
     /// Deletes a sale from the repository
     /// </summary>
     /// <param name="id">The unique identifier of the sale to delete</param>

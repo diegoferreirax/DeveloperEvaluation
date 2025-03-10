@@ -56,6 +56,12 @@ public class RegisterSaleHandler : IRequestHandler<RegisterSaleCommand, Register
             if (!validationResult.IsValid)
                 throw new ValidationException(validationResult.Errors);
 
+            var saleExist = await _saleRepository.GetSaleExistByNumberAsync(command.SaleNumber);
+            if (saleExist)
+            {
+                throw new InvalidOperationException($"Sale already exist.");
+            }
+
             // TODO: talvez armazenar os itens no cache e buscar os preços
             var commandItemsIds = command.SaleItens.Select(i => i.ItemId).ToArray();
             var itemsPrices = (await _itemRepository.GetItemsPriceByIdAsync(commandItemsIds)).Value;
@@ -70,18 +76,46 @@ public class RegisterSaleHandler : IRequestHandler<RegisterSaleCommand, Register
                 throw new KeyNotFoundException($"Customer with ID {customer.Value.Id} not found");
             }
 
-            // TODO: aplicar regra desconto
+            bool hasItemWithMoreThan20 = command.SaleItens.Any(item => item.Quantity > 20);
+            if (hasItemWithMoreThan20)
+            {
+                throw new InvalidOperationException($"Item quantity is more then 20.");
+            }
 
+            // TODO: encapsular regra
+            foreach (var item in command.SaleItens)
+            {
+                if (item.Quantity >= 4 && item.Quantity <= 9)
+                {
+                    item.Discount = 0.10m;
+                }
+                else if (item.Quantity >= 10 && item.Quantity <= 20)
+                {
+                    item.Discount = 0.20m;
+                }
+            }
+
+            // TODO: encapsular regra
             var totalAmount = 0m;
             foreach (var item in command.SaleItens)
             {
                 decimal price;
-                var itemPrice = itemsPrices.TryGetValue(item.ItemId, out price);
+                itemsPrices.TryGetValue(item.ItemId, out price);
 
-                var totalItemAmount = (price * item.Quantity) - item.Discount;
+                var totalPrice = price * item.Quantity;
 
-                item.SetTotalItemAmount(totalItemAmount);
-                totalAmount += totalItemAmount;
+                if (item.Discount > 0)
+                {
+                    var discountValue = totalPrice * item.Discount;
+                    var totalItemAmount = totalPrice - discountValue;
+                    item.SetTotalItemAmount(totalItemAmount);
+                    totalAmount += totalItemAmount;
+                }
+                else
+                {
+                    item.SetTotalItemAmount(totalPrice);
+                    totalAmount += totalPrice;
+                }
             }
 
             var sale = _mapper.Map<Sale>(command);
