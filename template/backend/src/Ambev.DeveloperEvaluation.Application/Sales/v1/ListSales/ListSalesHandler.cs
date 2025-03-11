@@ -37,7 +37,7 @@ public class ListSalesHandler : IRequestHandler<ListSalesCommand, ListSalesResul
         if (!validationResult.IsValid)
             throw new ValidationException(validationResult.Errors);
 
-        var (sales, count) = await _saleRepository.ListSalesAsync(command.Size, command.Page, command.Order, cancellationToken);
+        var (sales, count) = await _saleRepository.ListSalesAsync(command.Size, command.Page, command.Order, command.Descending, cancellationToken);
 
         var salesResult = new ListSalesResult
         (

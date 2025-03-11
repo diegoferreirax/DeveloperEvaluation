@@ -1,4 +1,4 @@
-﻿using Ambev.DeveloperEvaluation.Application.Sales.v1.SaleEvents;
+﻿using Ambev.DeveloperEvaluation.Application.Sales.v1.SaleObservers;
 using Ambev.DeveloperEvaluation.Domain.Entities;
 using Ambev.DeveloperEvaluation.Domain.Events;
 using Ambev.DeveloperEvaluation.Domain.Repositories;

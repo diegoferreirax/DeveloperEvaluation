@@ -31,7 +31,7 @@ public interface ISaleRepository
     /// <param name="pageNumber">Page number of the sales</param>
     /// <param name="cancellationToken">Cancellation token</param>
     /// <returns>The sale if found, Maybe otherwise</returns>
-    Task<(Sale[], int)> ListSalesAsync(int pageSize, int pageNumber, string order, CancellationToken cancellationToken = default);
+    Task<(Sale[], int)> ListSalesAsync(int pageSize, int pageNumber, string order, bool descending, CancellationToken cancellationToken = default);
 
     /// <summary>
     /// Check if sale exist by saleNumber

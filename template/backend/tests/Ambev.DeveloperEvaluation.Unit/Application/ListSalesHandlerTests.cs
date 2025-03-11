@@ -45,7 +45,7 @@ public class ListSalesHandlerTests
         }.ToArray();
 
         (Sale[], int) result = (sales, sales.Length);
-        _saleRepository.ListSalesAsync(Arg.Any<int>(), Arg.Any<int>(), Arg.Any<string>(), CancellationToken.None).Returns(result);
+        _saleRepository.ListSalesAsync(Arg.Any<int>(), Arg.Any<int>(), Arg.Any<string>(), Arg.Any<bool>(), CancellationToken.None).Returns(result);
 
         var salesResult = GetSalesResult(sales);
         _mapper.Map<SalesResult[]>(sales).Returns(salesResult);

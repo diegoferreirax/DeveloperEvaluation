@@ -27,6 +27,14 @@ public class ListSalesCommand : IRequest<ListSalesResult>
     /// </summary>
     public string Order { get; set; } = "SaleNumber";
 
+    /// <summary>
+    /// Indicates whether the sorting should be in descending order.
+    /// </summary>
+    /// <value>
+    /// <c>true</c> if the sorting is descending; otherwise, <c>false</c>.
+    /// </value>
+    public bool Descending { get; set; } = false;
+
     public ValidationResultDetail Validate()
     {
         var validator = new ListSalesCommandValidator();

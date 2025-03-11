@@ -1,5 +1,4 @@
-﻿using Ambev.DeveloperEvaluation.Application.Sales.v1.SaleEvents;
-using Ambev.DeveloperEvaluation.Application.Sales.v1.UpdateSale;
+﻿using Ambev.DeveloperEvaluation.Application.Sales.v1.SaleObservers;
 using Ambev.DeveloperEvaluation.Domain.Entities;
 using Ambev.DeveloperEvaluation.Domain.Events;
 using Ambev.DeveloperEvaluation.Domain.Repositories;
@@ -8,7 +7,6 @@ using AutoMapper;
 using CSharpFunctionalExtensions;
 using FluentValidation;
 using MediatR;
-using OneOf.Types;
 using System.Transactions;
 
 namespace Ambev.DeveloperEvaluation.Application.Sales.v1.UpdateSale;

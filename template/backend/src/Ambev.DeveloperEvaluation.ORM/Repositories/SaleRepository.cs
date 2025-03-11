@@ -1,5 +1,6 @@
 ﻿using Ambev.DeveloperEvaluation.Domain.Entities;
 using Ambev.DeveloperEvaluation.Domain.Repositories;
+using Ambev.DeveloperEvaluation.ORM.Extensions;
 using CSharpFunctionalExtensions;
 using Microsoft.EntityFrameworkCore;
 
@@ -53,11 +54,10 @@ public class SaleRepository : ISaleRepository
     /// <param name="order">Order of the sales</param>
     /// <param name="cancellationToken">Cancellation token</param>
     /// <returns>The sale if found, Maybe otherwise</returns>
-    public async Task<(Sale[], int)> ListSalesAsync(int pageSize, int pageNumber, string order, CancellationToken cancellationToken = default)
+    public async Task<(Sale[], int)> ListSalesAsync(int pageSize, int pageNumber, string order, bool descending, CancellationToken cancellationToken = default)
     {
-        // TODO: ajustar order
         var count = await _context.Sales.CountAsync();
-        var sales = await _context.Sales.Skip((pageNumber - 1) * pageSize).Take(pageSize).OrderBy(o => "SaleNumber").ToArrayAsync().ConfigureAwait(false);
+        var sales = await _context.Sales.Skip((pageNumber - 1) * pageSize).Take(pageSize).OrderByProperty(order, descending).ToArrayAsync().ConfigureAwait(false);
         return (sales, count);
     }
 

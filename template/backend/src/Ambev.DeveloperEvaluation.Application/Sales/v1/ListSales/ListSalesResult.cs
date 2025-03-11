@@ -49,5 +49,10 @@ public record SalesResult
     /// <summary>
     /// Gets the branch where the sale took place.
     /// </summary>
-    string Branch
+    string Branch,
+
+    /// <summary>
+    /// Gets the total amount of the sale.
+    /// </summary>
+    decimal TotalAmount
 );
