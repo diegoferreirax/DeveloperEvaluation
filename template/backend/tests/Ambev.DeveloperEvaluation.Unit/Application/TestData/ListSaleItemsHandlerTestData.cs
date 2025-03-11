@@ -1,4 +1,4 @@
-﻿using Ambev.DeveloperEvaluation.Application.Sales.ListSaleItems;
+﻿using Ambev.DeveloperEvaluation.Application.Sales.v1.ListSaleItems;
 using Bogus;
 
 namespace Ambev.DeveloperEvaluation.Unit.Application.TestData;
