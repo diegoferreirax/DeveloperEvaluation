@@ -6,17 +6,26 @@ using Xunit;
 
 namespace Ambev.DeveloperEvaluation.Unit.Application;
 
+/// <summary>
+/// Unit tests for the DeleteSaleHandler.
+/// </summary>
 public class DeleteSaleHandlerTests
 {
     private readonly ISaleRepository _saleRepository;
     private readonly DeleteSaleHandler _handler;
 
+    /// <summary>
+    /// Initializes a new instance of the DeleteSaleHandlerTests
+    /// </summary>
     public DeleteSaleHandlerTests()
     {
         _saleRepository = Substitute.For<ISaleRepository>();
         _handler = new DeleteSaleHandler(_saleRepository);
     }
 
+    /// <summary>
+    /// Tests if deleting a sale with a valid ID returns a success response.
+    /// </summary>
     [Fact(DisplayName = "Given valid sale Id When deleting sale Then returns success response")]
     public async Task Handle_ValidRequest_ReturnsSuccessResponse()
     {
@@ -32,6 +41,9 @@ public class DeleteSaleHandlerTests
         await _saleRepository.Received(1).DeleteAsync(Arg.Any<Guid>(), Arg.Any<CancellationToken>());
     }
 
+    /// <summary>
+    /// Tests if deleting a sale with an invalid ID throws a KeyNotFoundException
+    /// </summary>
     [Fact(DisplayName = "Given invalid sale Id When deleting sale Then returns error response")]
     public async Task Handle_InvalidRequest_ReturnsErrorResponse()
     {

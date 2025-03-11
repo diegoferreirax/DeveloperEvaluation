@@ -11,7 +11,7 @@ using Xunit;
 namespace Ambev.DeveloperEvaluation.Unit.Application;
 
 /// <summary>
-/// Contains unit tests for the <see cref="CreateUserHandler"/> class.
+/// Contains unit tests for the CreateUserHandler.
 /// </summary>
 public class CreateUserHandlerTests
 {
@@ -21,7 +21,7 @@ public class CreateUserHandlerTests
     private readonly CreateUserHandler _handler;
 
     /// <summary>
-    /// Initializes a new instance of the <see cref="CreateUserHandlerTests"/> class.
+    /// Initializes a new instance of the CreateUserHandlerTests.
     /// Sets up the test dependencies and creates fake data generators.
     /// </summary>
     public CreateUserHandlerTests()

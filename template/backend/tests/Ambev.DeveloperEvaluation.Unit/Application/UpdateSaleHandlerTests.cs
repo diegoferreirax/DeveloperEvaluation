@@ -11,6 +11,10 @@ using Xunit;
 
 namespace Ambev.DeveloperEvaluation.Unit.Application;
 
+/// <summary>
+/// Unit tests for the UpdateSaleHandler
+/// These tests ensure that the handler properly updates a sale and its associated sale items.
+/// </summary>
 public class UpdateSaleHandlerTests
 {
     private readonly IMapper _mapper;
@@ -19,6 +23,10 @@ public class UpdateSaleHandlerTests
     private readonly IItemRepository _itemRepository;
     private readonly UpdateSaleHandler _handler;
 
+    /// <summary>
+    /// Initializes a new instance of the UpdateSaleHandlerTests
+    /// This constructor sets up all the required dependencies for testing the handler.
+    /// </summary>
     public UpdateSaleHandlerTests()
     {
         _mapper = Substitute.For<IMapper>();
@@ -28,6 +36,10 @@ public class UpdateSaleHandlerTests
         _handler = new UpdateSaleHandler(_mapper, _saleRepository, _saleItemRepository, _itemRepository);
     }
 
+    /// <summary>
+    /// Tests the scenario where the same items are updated in the sale.
+    /// Verifies that the update operation returns a success response.
+    /// </summary>
     [Fact(DisplayName = "Given update same items When updating sale Then returns success response")]
     public async Task Handle_UpdateSameSaleItemsRequest_ReturnsSuccessResponse()
     {
@@ -65,6 +77,10 @@ public class UpdateSaleHandlerTests
         await _saleItemRepository.Received(1).UpdateAsync(Arg.Any<SaleItem[]>(), Arg.Any<CancellationToken>());
     }
 
+    /// <summary>
+    /// Tests the scenario where items are updated and added to the sale.
+    /// Verifies that the update operation returns a success response and the items are updated and added.
+    /// </summary>
     [Fact(DisplayName = "Given update and add item When updating sale Then returns success response")]
     public async Task Handle_UpdateAndAddSaleItemsRequest_ReturnsSuccessResponse()
     {
@@ -99,6 +115,11 @@ public class UpdateSaleHandlerTests
         await _saleItemRepository.Received(1).RegisterSaleItensAsync(Arg.Any<SaleItem[]>(), Arg.Any<CancellationToken>());
     }
 
+    /// <summary>
+    /// Tests the scenario where items are updated and removed to the sale.
+    /// Verifies that the update operation returns a success response and the items are updated and removed.
+    /// </summary>
+    /// <returns>A task representing the asynchronous operation.</returns>
     [Fact(DisplayName = "Given update and remove item When updating sale Then returns success response")]
     public async Task Handle_UpdateAndRemoveSaleItemsRequest_ReturnsSuccessResponse()
     {
@@ -107,7 +128,7 @@ public class UpdateSaleHandlerTests
         var sale = SaleTestData.GenerateValidSale();
         sale.Id = command.Id;
 
-        var saleItems = new List<SaleItem>() 
+        var saleItems = new List<SaleItem>()
         {
             SaleItemTestData.GenerateValidSaleItem(),
             SaleItemTestData.GenerateValidSaleItem()
@@ -134,7 +155,11 @@ public class UpdateSaleHandlerTests
         await _saleItemRepository.Received(1).DeleteAsync(Arg.Any<SaleItem[]>(), Arg.Any<CancellationToken>());
     }
 
-    [Fact(DisplayName = "Given error When item quantity is more then 20 Then returns error response")]
+    /// <summary>
+    /// Tests the scenario where the item quantity is invalid (more than 20).
+    /// Verifies that the update operation throws an InvalidOperationException.
+    /// </summary>
+    [Fact(DisplayName = "Given error When item quantity is more than 20 Then returns error response")]
     public async Task Handle_InvalidItemQuantityRequest_ReturnsErrorResponse()
     {
         // Arrange
@@ -151,6 +176,10 @@ public class UpdateSaleHandlerTests
         await act.Should().ThrowAsync<InvalidOperationException>();
     }
 
+    /// <summary>
+    /// Tests the scenario where the sale is not found in the repository.
+    /// Verifies that the update operation throws a KeyNotFoundException.
+    /// </summary>
     [Fact(DisplayName = "Given error When sale not found Then returns error response")]
     public async Task Handle_SaleNotFoundRequest_ReturnsErrorResponse()
     {

@@ -10,12 +10,18 @@ using Xunit;
 
 namespace Ambev.DeveloperEvaluation.Unit.Application;
 
+/// <summary>
+/// Unit tests for the ListSalesHandler.
+/// </summary>
 public class ListSalesHandlerTests
 {
     private readonly IMapper _mapper;
     private readonly ISaleRepository _saleRepository;
     private readonly ListSalesHandler _handler;
 
+    /// <summary>
+    /// Initializes a new instance of the ListSalesHandlerTests.
+    /// </summary>
     public ListSalesHandlerTests()
     {
         _mapper = Substitute.For<IMapper>();
@@ -23,6 +29,9 @@ public class ListSalesHandlerTests
         _handler = new ListSalesHandler(_mapper, _saleRepository);
     }
 
+    /// <summary>
+    /// Tests if listing sales with a valid request returns a success response.
+    /// </summary>
     [Fact(DisplayName = "Given valid sales When listing sales Then returns success response")]
     public async Task Handle_ValidRequest_ReturnsSuccessResponse()
     {

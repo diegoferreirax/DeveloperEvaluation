@@ -11,6 +11,9 @@ using Xunit;
 
 namespace Ambev.DeveloperEvaluation.Unit.Application;
 
+/// <summary>
+/// Unit tests for the ListSaleItemsHandler.
+/// </summary>
 public class ListSaleItemsHandlerTests
 {
     private readonly IMapper _mapper;
@@ -18,6 +21,9 @@ public class ListSaleItemsHandlerTests
     private readonly ISaleRepository _saleRepository;
     private readonly ListSaleItemsHandler _handler;
 
+    /// <summary>
+    /// Initializes a new instance of the ListSaleItemsHandlerTests.
+    /// </summary>
     public ListSaleItemsHandlerTests()
     {
         _mapper = Substitute.For<IMapper>();
@@ -26,6 +32,9 @@ public class ListSaleItemsHandlerTests
         _handler = new ListSaleItemsHandler(_mapper, _saleItemRepository, _saleRepository);
     }
 
+    /// <summary>
+    /// Tests if listing sale items with a valid request returns a success response.
+    /// </summary>
     [Fact(DisplayName = "Given valid sale items When listing items Then returns success response")]
     public async Task Handle_ValidRequest_ReturnsSuccessResponse()
     {
@@ -47,6 +56,9 @@ public class ListSaleItemsHandlerTests
         listSalesResult.Should().NotBeNull();
     }
 
+    /// <summary>
+    /// Tests if attempting to list sale items for a non-existing sale throws a KeyNotFoundException.
+    /// </summary>
     [Fact(DisplayName = "Given error When sale not found Then returns error response")]
     public async Task Handle_SaleNotFound_ReturnsErroResponse()
     {

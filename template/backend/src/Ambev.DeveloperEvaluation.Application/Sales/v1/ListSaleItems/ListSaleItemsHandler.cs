@@ -26,6 +26,12 @@ public class ListSaleItemsHandler : IRequestHandler<ListSaleItemsCommand, ListIt
         _saleRepository = saleRepository;
     }
 
+    /// <summary>
+    /// Handles the ListSaleItemsCommand request
+    /// </summary>
+    /// <param name="command">The ListSalesItems command</param>
+    /// <param name="cancellationToken">Cancellation token</param>
+    /// <returns>A list of sales items</returns>
     public async Task<ListItemsResult> Handle(ListSaleItemsCommand command, CancellationToken cancellationToken)
     {
         var validator = new ListSaleItemsCommandValidator();

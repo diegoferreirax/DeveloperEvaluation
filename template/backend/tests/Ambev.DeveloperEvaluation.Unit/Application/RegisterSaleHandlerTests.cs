@@ -1,7 +1,6 @@
 ﻿using Ambev.DeveloperEvaluation.Application.Sales.v1.RegisterSale;
 using Ambev.DeveloperEvaluation.Domain.Entities;
 using Ambev.DeveloperEvaluation.Domain.Repositories;
-using Ambev.DeveloperEvaluation.ORM.Repositories;
 using Ambev.DeveloperEvaluation.Unit.Application.TestData;
 using Ambev.DeveloperEvaluation.Unit.Domain.Entities.TestData;
 using AutoMapper;
@@ -12,6 +11,9 @@ using Xunit;
 
 namespace Ambev.DeveloperEvaluation.Unit.Application;
 
+/// <summary>
+/// Unit tests for the RegisterSaleHandler.
+/// </summary>
 public class RegisterSaleHandlerTests
 {
     private readonly IMapper _mapper;
@@ -21,6 +23,9 @@ public class RegisterSaleHandlerTests
     private readonly IItemRepository _itemRepository;
     private readonly RegisterSaleHandler _handler;
 
+    /// <summary>
+    /// Initializes a new instance of the RegisterSaleHandlerTests.
+    /// </summary>
     public RegisterSaleHandlerTests()
     {
         _mapper = Substitute.For<IMapper>();
@@ -33,6 +38,9 @@ public class RegisterSaleHandlerTests
 
     // TODO: fazer testes validando calculo total da venda
 
+    /// <summary>
+    /// Tests if registering a sale with valid data returns a success response.
+    /// </summary>
     [Fact(DisplayName = "Given valid sale data When registering sale Then returns success response")]
     public async Task Handle_ValidRequest_ReturnsSuccessResponse()
     {
@@ -87,6 +95,9 @@ public class RegisterSaleHandlerTests
         await _saleItemRepository.Received(1).RegisterSaleItensAsync(Arg.Any<SaleItem[]>(), Arg.Any<CancellationToken>());
     }
 
+    /// <summary>
+    /// Tests if an error is thrown when the sale number already exists.
+    /// </summary>
     [Fact(DisplayName = "Given error When Sale number already exist Then returns error response")]
     public async Task Handle_SaleNumberExist_ReturnsErrorResponse()
     {
@@ -102,6 +113,9 @@ public class RegisterSaleHandlerTests
         await act.Should().ThrowAsync<InvalidOperationException>();
     }
 
+    /// <summary>
+    /// Tests if an error is thrown when the customer is not found.
+    /// </summary>
     [Fact(DisplayName = "Given error When Customer not found Then returns error response")]
     public async Task Handle_CustomerNotFound_ReturnsErrorResponse()
     {
@@ -118,6 +132,9 @@ public class RegisterSaleHandlerTests
         await act.Should().ThrowAsync<KeyNotFoundException>();
     }
 
+    /// <summary>
+    /// Tests if an error is thrown when the item quantity exceeds the allowed limit.
+    /// </summary>
     [Fact(DisplayName = "Given error When item quantity is more then 20 Then returns error response")]
     public async Task Handle_InvalidItemQuantityRequest_ReturnsErrorResponse()
     {
