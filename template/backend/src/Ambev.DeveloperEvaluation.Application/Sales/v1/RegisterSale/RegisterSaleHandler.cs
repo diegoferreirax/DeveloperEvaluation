@@ -1,5 +1,6 @@
-﻿using Ambev.DeveloperEvaluation.Application.Sales.v1.RegisterSale;
+﻿using Ambev.DeveloperEvaluation.Application.Sales.v1.SaleEvents;
 using Ambev.DeveloperEvaluation.Domain.Entities;
+using Ambev.DeveloperEvaluation.Domain.Events;
 using Ambev.DeveloperEvaluation.Domain.Repositories;
 using Ambev.DeveloperEvaluation.Domain.Strategies.Discount;
 using Ambev.DeveloperEvaluation.Domain.Validation;
@@ -126,6 +127,9 @@ public class RegisterSaleHandler : IRequestHandler<RegisterSaleCommand, Register
             await _saleItemRepository.RegisterSaleItensAsync(saleItens.ToArray(), cancellationToken);
 
             var result = _mapper.Map<RegisterSaleResult>(saleId);
+
+            var publisher = new EventPublisher(new SaleCreatedObserver());
+            await publisher.Notify(result);
 
             tx.Complete();
             return result;

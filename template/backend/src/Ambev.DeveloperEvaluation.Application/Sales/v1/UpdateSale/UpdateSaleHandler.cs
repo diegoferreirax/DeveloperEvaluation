@@ -1,11 +1,14 @@
-﻿using Ambev.DeveloperEvaluation.Application.Sales.v1.UpdateSale;
+﻿using Ambev.DeveloperEvaluation.Application.Sales.v1.SaleEvents;
+using Ambev.DeveloperEvaluation.Application.Sales.v1.UpdateSale;
 using Ambev.DeveloperEvaluation.Domain.Entities;
+using Ambev.DeveloperEvaluation.Domain.Events;
 using Ambev.DeveloperEvaluation.Domain.Repositories;
 using Ambev.DeveloperEvaluation.Domain.Strategies.Discount;
 using AutoMapper;
 using CSharpFunctionalExtensions;
 using FluentValidation;
 using MediatR;
+using OneOf.Types;
 using System.Transactions;
 
 namespace Ambev.DeveloperEvaluation.Application.Sales.v1.UpdateSale;
@@ -66,11 +69,12 @@ public class UpdateSaleHandler : IRequestHandler<UpdateSaleCommand, UpdateSaleRe
                 throw new KeyNotFoundException($"Sale with ID {command.Id} not found");
             }
 
-            // TODO: atualizar todos os dados ? 
             var saleToUpdate = sale.Value;
             saleToUpdate.SaleDate = command.SaleDate;
-            saleToUpdate.IsCanceled = command.IsCanceled;
             saleToUpdate.Branch = command.Branch;
+
+            // TODO: talvez criar um endpoint para cancelar venda
+            saleToUpdate.IsCanceled = command.IsCanceled;
 
             var saleItems = (await _saleItemRepository.GetBySaleIdAsync(saleToUpdate.Id, cancellationToken)).ToList();
 
@@ -148,6 +152,17 @@ public class UpdateSaleHandler : IRequestHandler<UpdateSaleCommand, UpdateSaleRe
             {
                 await _saleItemRepository.RegisterSaleItensAsync(itemsToAdd.ToArray(), cancellationToken);
             }
+
+            var publisher = new EventPublisher();
+
+            if (saleToUpdate.IsCanceled)
+            {
+                publisher.RegisterObserver(new SaleCancelledObserver());
+                publisher.RegisterObserver(new SaleItemCancelledObserver());
+            }
+
+            publisher.RegisterObserver(new SaleModifiedObserver());
+            await publisher.Notify(saleToUpdate.Id);
 
             tx.Complete();
             return new UpdateSaleResult();
