@@ -8,6 +8,5 @@ public class ListSalesProfile : Profile
     public ListSalesProfile()
     {
         CreateMap<Sale, SalesResult>();
-        CreateMap<SaleItem, SalesItemsResult>();
     }
 }

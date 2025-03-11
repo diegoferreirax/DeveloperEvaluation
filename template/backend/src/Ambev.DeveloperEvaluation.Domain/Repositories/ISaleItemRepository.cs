@@ -21,8 +21,8 @@ public interface ISaleItemRepository
     /// </summary>
     /// <param name="id">The unique identifier of the saleItens</param>
     /// <param name="cancellationToken">Cancellation token</param>
-    /// <returns>The saleItens if found, Maybe otherwise</returns>
-    Task<Maybe<SaleItem[]>> GetBySaleIdAsync(Guid saleId, CancellationToken cancellationToken = default);
+    /// <returns>The saleItens if found, empty list otherwise</returns>
+    Task<SaleItem[]> GetBySaleIdAsync(Guid saleId, CancellationToken cancellationToken = default);
 
     /// <summary>
     /// Deletes a saleItens from the database
@@ -38,4 +38,12 @@ public interface ISaleItemRepository
     /// <param name="id">The unique identifier of the saleItem to update</param>
     /// <param name="cancellationToken">Cancellation token</param>
     Task UpdateAsync(SaleItem[] saleItens, CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// Retrieves a saleItens by their unique identifier
+    /// </summary>
+    /// <param name="id">The unique identifier of the saleItens</param>
+    /// <param name="cancellationToken">Cancellation token</param>
+    /// <returns>The saleItens if found, empty list otherwise</returns>
+    Task<SaleItem[]> GetBySaleWithItemIdAsync(Guid saleId, CancellationToken cancellationToken = default);
 }

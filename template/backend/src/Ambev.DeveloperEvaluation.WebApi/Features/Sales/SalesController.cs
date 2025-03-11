@@ -11,6 +11,9 @@ using Ambev.DeveloperEvaluation.Application.Sales.UpdateSale;
 using Ambev.DeveloperEvaluation.WebApi.Features.Sales.ListSales;
 using Ambev.DeveloperEvaluation.Application.Sales.ListSales;
 using Ambev.DeveloperEvaluation.WebApi.Features.Users.GetUser;
+using Ambev.DeveloperEvaluation.WebApi.Features.Sales.ListSaleItems;
+using FluentValidation;
+using Ambev.DeveloperEvaluation.Application.Sales.ListSaleItems;
 
 namespace Ambev.DeveloperEvaluation.WebApi.Features.Sales;
 
@@ -18,7 +21,7 @@ namespace Ambev.DeveloperEvaluation.WebApi.Features.Sales;
 /// Controller for managing sale operations
 /// </summary>
 [ApiController]
-[Route("api/[controller]")]
+[Route("api/sale")]
 public class SalesController : BaseController
 {
     private readonly IMediator _mediator;
@@ -90,7 +93,7 @@ public class SalesController : BaseController
     /// <summary>
     /// Updates an existing sale.
     /// </summary>
-    /// <param name="request">The UpdateSaleRequest containing the updated data for the sale.</param>
+    /// <param name="request">The UpdateSaleRequest data</param>
     /// <param name="cancellationToken">Cancellation token</param>
     /// <returns>An IActionResult representing the outcome of the update operation.</returns>
     [HttpPut]
@@ -118,10 +121,10 @@ public class SalesController : BaseController
     /// <summary>
     /// List sales
     /// </summary>
-    /// <param name="request">The UpdateSaleRequest containing the updated data for the sale.</param>
+    /// <param name="request">The ListSalesRequest data</param>
     /// <param name="cancellationToken">Cancellation token</param>
     /// <returns>An paginate list of sales.</returns>
-    [HttpGet]
+    [HttpGet("sales")]
     public async Task<IActionResult> ListSales([FromQuery] ListSalesRequest request, CancellationToken cancellationToken)
     {
         var validator = new ListSalesRequestValidator();
@@ -136,5 +139,29 @@ public class SalesController : BaseController
 
         var paginatedList = new PaginatedList<SalesResponse>(responses.ToList(), response.salesCount, request.Page, request.Size);
         return OkPaginated(paginatedList);
+    }
+
+    /// <summary>
+    /// List sales items
+    /// </summary>
+    /// <param name="id">The unique identifier of the sale</param>
+    /// <param name="cancellationToken">Cancellation token</param>
+    /// <returns>An List of sales items.</returns>
+    [HttpGet("{id}/items")]
+    public async Task<IActionResult> ListSalesItems([FromRoute] Guid id, CancellationToken cancellationToken)
+    {
+        var request = new ListSaleItemsRequest(id);
+        var validator = new ListSaleItemsRequestValidator();
+        var validationResult = await validator.ValidateAsync(request, cancellationToken);
+
+        if (!validationResult.IsValid)
+            return BadRequest(validationResult.Errors);
+
+        var command = _mapper.Map<ListSaleItemsCommand>(request);
+        var response = await _mediator.Send(command, cancellationToken);
+
+        var items = _mapper.Map<ListSaleItemsResponse[]>(response.Items);
+
+        return Ok(new ListItemsResponse(items));
     }
 }

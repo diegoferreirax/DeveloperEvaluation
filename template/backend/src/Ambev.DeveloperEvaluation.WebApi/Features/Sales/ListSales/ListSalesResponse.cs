@@ -11,13 +11,4 @@ public record SalesResponse
     DateTime SaleDate,
     bool IsCanceled,
     string Branch
-    //ListSalesItemsResponse[] SaleItems
-);
-
-public record SalesItemsResponse
-(
-    Guid ItemId,
-    int Quantity,
-    decimal Discount,
-    decimal TotalItemAmount
 );

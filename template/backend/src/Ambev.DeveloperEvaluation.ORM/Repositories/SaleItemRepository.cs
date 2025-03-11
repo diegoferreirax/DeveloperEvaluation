@@ -61,9 +61,20 @@ public class SaleItemRepository : ISaleItemRepository
     /// </summary>
     /// <param name="id">The unique identifier of the saleItens</param>
     /// <param name="cancellationToken">Cancellation token</param>
-    /// <returns>The saleItens if found, Maybe otherwise</returns>
-    public async Task<Maybe<SaleItem[]>> GetBySaleIdAsync(Guid saleId, CancellationToken cancellationToken = default)
+    /// <returns>The saleItens if found, empty list otherwise</returns>
+    public async Task<SaleItem[]> GetBySaleIdAsync(Guid saleId, CancellationToken cancellationToken = default)
     {
         return await _context.SaleItens.AsNoTracking().Where(s => s.SaleId == saleId).ToArrayAsync().ConfigureAwait(false);
+    }
+
+    /// <summary>
+    /// Retrieves a saleItens by their unique identifier
+    /// </summary>
+    /// <param name="id">The unique identifier of the saleItens</param>
+    /// <param name="cancellationToken">Cancellation token</param>
+    /// <returns>The saleItens if found, empty list otherwise</returns>
+    public async Task<SaleItem[]> GetBySaleWithItemIdAsync(Guid saleId, CancellationToken cancellationToken = default)
+    {
+        return await _context.SaleItens.Include("Item").AsNoTracking().Where(s => s.SaleId == saleId).ToArrayAsync().ConfigureAwait(false);
     }
 }

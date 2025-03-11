@@ -62,7 +62,7 @@ public class UpdateSaleHandler : IRequestHandler<UpdateSaleCommand, UpdateSaleRe
             var sale = await _saleRepository.GetByIdWithTrackingAsync(command.Id, cancellationToken);
             if (sale.HasNoValue)
             {
-                throw new KeyNotFoundException($"Sale with ID {sale.Value.Id} not found");
+                throw new KeyNotFoundException($"Sale with ID {command.Id} not found");
             }
 
             // TODO: atualizar todos os dados ? 
@@ -71,7 +71,7 @@ public class UpdateSaleHandler : IRequestHandler<UpdateSaleCommand, UpdateSaleRe
             saleToUpdate.IsCanceled = command.IsCanceled;
             saleToUpdate.Branch = command.Branch;
 
-            var saleItems = (await _saleItemRepository.GetBySaleIdAsync(saleToUpdate.Id, cancellationToken)).Value.ToList();
+            var saleItems = (await _saleItemRepository.GetBySaleIdAsync(saleToUpdate.Id, cancellationToken)).ToList();
 
             var updatedItems = command.SaleItens;
             var updatedItemIds = updatedItems.Select(i => i.ItemId).ToList();

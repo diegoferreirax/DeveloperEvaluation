@@ -12,15 +12,4 @@ public record SalesResult
     DateTime SaleDate,
     bool IsCanceled,
     string Branch
-
-// TODO: retornar itens, 
-//ListSalesItemsResult[] SaleItems
-);
-
-public record SalesItemsResult
-(
-    Guid ItemId,
-    int Quantity,
-    decimal Discount,
-    decimal TotalItemAmount
 );

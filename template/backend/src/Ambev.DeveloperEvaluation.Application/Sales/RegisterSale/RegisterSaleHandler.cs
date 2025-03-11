@@ -67,7 +67,7 @@ public class RegisterSaleHandler : IRequestHandler<RegisterSaleCommand, Register
             var customer = await _customerRepository.GetByIdAsync(command.CustomerId);
             if (customer.HasNoValue)
             {
-                throw new KeyNotFoundException($"Customer with ID {customer.Value.Id} not found");
+                throw new KeyNotFoundException($"Customer with ID {command.CustomerId} not found");
             }
 
             bool hasItemWithMoreThan20 = command.SaleItens.Any(item => item.Quantity > 20);
