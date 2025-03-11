@@ -25,4 +25,13 @@ public static class UpdateSaleHandlerTestData
     {
         return updateSaleItemHandlerFaker.Generate();
     }
+
+    public static UpdateSaleItemCommand[] GenerateValidItemsCommand()
+    {
+        return new List<UpdateSaleItemCommand>()
+        {
+            updateSaleItemHandlerFaker.Generate(),
+            updateSaleItemHandlerFaker.Generate()
+        }.ToArray();
+    }
 }

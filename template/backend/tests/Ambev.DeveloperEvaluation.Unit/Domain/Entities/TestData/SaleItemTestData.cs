@@ -15,4 +15,13 @@ public static class SaleItemTestData
     {
         return SaleItemFaker.Generate();
     }
+
+    public static SaleItem[] GenerateValidSaleItemsList()
+    {
+        return new List<SaleItem> ()
+        {
+            SaleItemFaker.Generate(),
+            SaleItemFaker.Generate()
+        }.ToArray();
+    }
 }

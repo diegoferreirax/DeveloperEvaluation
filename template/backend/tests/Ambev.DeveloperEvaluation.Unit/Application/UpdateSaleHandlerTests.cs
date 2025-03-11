@@ -1,10 +1,11 @@
 ﻿using Ambev.DeveloperEvaluation.Application.Sales.UpdateSale;
 using Ambev.DeveloperEvaluation.Domain.Entities;
 using Ambev.DeveloperEvaluation.Domain.Repositories;
-using Ambev.DeveloperEvaluation.ORM.Repositories;
 using Ambev.DeveloperEvaluation.Unit.Application.TestData;
 using Ambev.DeveloperEvaluation.Unit.Domain.Entities.TestData;
 using AutoMapper;
+using CSharpFunctionalExtensions;
+using FluentAssertions;
 using NSubstitute;
 using Xunit;
 
@@ -28,7 +29,7 @@ public class UpdateSaleHandlerTests
     }
 
     [Fact(DisplayName = "Given update same items When updating sale Then returns success response")]
-    public async Task Handle_UpdateSameSaleItemRequest_ReturnsSuccessResponse()
+    public async Task Handle_UpdateSameSaleItemsRequest_ReturnsSuccessResponse()
     {
         // Arrange
         var command = UpdateSaleHandlerTestData.GenerateValidCommand();
@@ -65,7 +66,7 @@ public class UpdateSaleHandlerTests
     }
 
     [Fact(DisplayName = "Given update and add item When updating sale Then returns success response")]
-    public async Task Handle_UpdateAndAddSaleItemRequest_ReturnsSuccessResponse()
+    public async Task Handle_UpdateAndAddSaleItemsRequest_ReturnsSuccessResponse()
     {
         // Arrange
         var command = UpdateSaleHandlerTestData.GenerateValidCommand();
@@ -99,7 +100,7 @@ public class UpdateSaleHandlerTests
     }
 
     [Fact(DisplayName = "Given update and remove item When updating sale Then returns success response")]
-    public async Task Handle_UpdateAndRemoveSaleItemRequest_ReturnsSuccessResponse()
+    public async Task Handle_UpdateAndRemoveSaleItemsRequest_ReturnsSuccessResponse()
     {
         // Arrange
         var command = UpdateSaleHandlerTestData.GenerateValidCommand();
@@ -131,5 +132,40 @@ public class UpdateSaleHandlerTests
         await _saleRepository.Received(1).UpdateAsync(Arg.Any<Sale>(), Arg.Any<CancellationToken>());
         await _saleItemRepository.Received(1).UpdateAsync(Arg.Any<SaleItem[]>(), Arg.Any<CancellationToken>());
         await _saleItemRepository.Received(1).DeleteAsync(Arg.Any<SaleItem[]>(), Arg.Any<CancellationToken>());
+    }
+
+    [Fact(DisplayName = "Given error When item quantity is more then 20 Then returns error response")]
+    public async Task Handle_InvalidItemQuantityRequest_ReturnsErrorResponse()
+    {
+        // Arrange
+        var command = UpdateSaleHandlerTestData.GenerateValidCommand();
+
+        var commandItems = UpdateSaleHandlerTestData.GenerateValidItemsCommand();
+        commandItems.First().Quantity = 21;
+        command.SaleItens = commandItems;
+
+        // Act
+        Func<Task> act = async () => await _handler.Handle(command, CancellationToken.None);
+
+        // Assert
+        await act.Should().ThrowAsync<InvalidOperationException>();
+    }
+
+    [Fact(DisplayName = "Given error When sale not found Then returns error response")]
+    public async Task Handle_SaleNotFoundRequest_ReturnsErrorResponse()
+    {
+        // Arrange
+        var command = UpdateSaleHandlerTestData.GenerateValidCommand();
+
+        var commandItems = UpdateSaleHandlerTestData.GenerateValidItemsCommand();
+        command.SaleItens = commandItems;
+
+        _saleRepository.GetByIdWithTrackingAsync(Arg.Any<Guid>(), CancellationToken.None).Returns(Maybe.None);
+
+        // Act
+        Func<Task> act = async () => await _handler.Handle(command, CancellationToken.None);
+
+        // Assert
+        await act.Should().ThrowAsync<KeyNotFoundException>();
     }
 }

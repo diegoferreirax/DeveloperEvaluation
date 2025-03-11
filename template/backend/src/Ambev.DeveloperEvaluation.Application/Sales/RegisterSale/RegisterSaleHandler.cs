@@ -70,6 +70,7 @@ public class RegisterSaleHandler : IRequestHandler<RegisterSaleCommand, Register
                 throw new KeyNotFoundException($"Customer with ID {command.CustomerId} not found");
             }
 
+            // TODO: encapsular regra
             bool hasItemWithMoreThan20 = command.SaleItens.Any(item => item.Quantity > 20);
             if (hasItemWithMoreThan20)
             {
