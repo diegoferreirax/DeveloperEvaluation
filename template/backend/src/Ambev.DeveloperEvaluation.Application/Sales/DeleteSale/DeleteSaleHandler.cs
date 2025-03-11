@@ -7,7 +7,7 @@ namespace Ambev.DeveloperEvaluation.Application.Sales.DeleteSale;
 /// <summary>
 /// Handler for processing DeleteSaleCommand requests
 /// </summary>
-public class DeleteSaleHandler : IRequestHandler<DeleteSaleCommand, DeleteSaleResponse>
+public class DeleteSaleHandler : IRequestHandler<DeleteSaleCommand, DeleteSaleResult>
 {
     private readonly ISaleRepository _saleRepository;
 
@@ -26,7 +26,7 @@ public class DeleteSaleHandler : IRequestHandler<DeleteSaleCommand, DeleteSaleRe
     /// <param name="command">The DeleteSale command</param>
     /// <param name="cancellationToken">Cancellation token</param>
     /// <returns>The deleted sale details</returns>
-    public async Task<DeleteSaleResponse> Handle(DeleteSaleCommand command, CancellationToken cancellationToken)
+    public async Task<DeleteSaleResult> Handle(DeleteSaleCommand command, CancellationToken cancellationToken)
     {
         var validator = new DeleteSaleCommandValidator();
         var validationResult = await validator.ValidateAsync(command, cancellationToken);
@@ -38,6 +38,6 @@ public class DeleteSaleHandler : IRequestHandler<DeleteSaleCommand, DeleteSaleRe
         if (!success)
             throw new KeyNotFoundException($"Sale with ID {command.Id} not found");
 
-        return new DeleteSaleResponse(true);
+        return new DeleteSaleResult(true);
     }
 }

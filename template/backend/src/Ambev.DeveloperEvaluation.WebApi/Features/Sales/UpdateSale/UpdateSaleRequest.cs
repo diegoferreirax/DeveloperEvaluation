@@ -17,8 +17,6 @@ public record UpdateSaleRequest
     UpdateSaleItemRequest[] SaleItens
 );
 
-// TODO: validar saleitem
-
 /// <summary>
 /// Represents a sale item that is part of an update sale request, including item ID, quantity, and discount details.
 /// </summary>

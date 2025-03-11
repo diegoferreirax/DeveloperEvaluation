@@ -25,6 +25,15 @@ public interface ISaleRepository
     Task<Maybe<Sale>> GetByIdAsync(Guid id, CancellationToken cancellationToken = default);
 
     /// <summary>
+    /// Retrieves a list of sale 
+    /// </summary>
+    /// <param name="pageSize">Page size of the sales</param>
+    /// <param name="pageNumber">Page number of the sales</param>
+    /// <param name="cancellationToken">Cancellation token</param>
+    /// <returns>The sale if found, Maybe otherwise</returns>
+    Task<(Sale[], int)> ListSalesAsync(int pageSize, int pageNumber, string order, CancellationToken cancellationToken = default);
+
+    /// <summary>
     /// Check if sale exist by saleNumber
     /// </summary>
     /// <param name="saleNumber">The number of the sale</param>

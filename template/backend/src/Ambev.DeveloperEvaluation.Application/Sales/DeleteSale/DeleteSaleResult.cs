@@ -4,4 +4,4 @@
 /// Response model for DeleteSale operation
 /// </summary>
 /// <param name="Success">Indicates whether the deletion was successful.</param>
-public record DeleteSaleResponse(bool Success);
+public record DeleteSaleResult(bool Success);

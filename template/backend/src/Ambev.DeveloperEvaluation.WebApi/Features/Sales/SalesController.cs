@@ -8,6 +8,9 @@ using Ambev.DeveloperEvaluation.WebApi.Features.Sales.DeleteSale;
 using Ambev.DeveloperEvaluation.Application.Sales.DeleteSale;
 using Ambev.DeveloperEvaluation.WebApi.Features.Sales.UpdateSale;
 using Ambev.DeveloperEvaluation.Application.Sales.UpdateSale;
+using Ambev.DeveloperEvaluation.WebApi.Features.Sales.ListSales;
+using Ambev.DeveloperEvaluation.Application.Sales.ListSales;
+using Ambev.DeveloperEvaluation.WebApi.Features.Users.GetUser;
 
 namespace Ambev.DeveloperEvaluation.WebApi.Features.Sales;
 
@@ -56,7 +59,7 @@ public class SalesController : BaseController
     }
 
     /// <summary>
-    /// Deletes a sale identified by the provided <paramref name="id"/>.
+    /// Deletes a sale.
     /// </summary>
     /// <param name="id">The unique identifier of the sale to be deleted.</param>
     /// <param name="cancellationToken">Cancellation token</param>
@@ -85,7 +88,7 @@ public class SalesController : BaseController
     }
 
     /// <summary>
-    /// Updates an existing sale with the provided details in the <paramref name="request"/>.
+    /// Updates an existing sale.
     /// </summary>
     /// <param name="request">The UpdateSaleRequest containing the updated data for the sale.</param>
     /// <param name="cancellationToken">Cancellation token</param>
@@ -110,5 +113,28 @@ public class SalesController : BaseController
             Success = true,
             Message = "Sale updated successfully"
         });
+    }
+
+    /// <summary>
+    /// List sales
+    /// </summary>
+    /// <param name="request">The UpdateSaleRequest containing the updated data for the sale.</param>
+    /// <param name="cancellationToken">Cancellation token</param>
+    /// <returns>An paginate list of sales.</returns>
+    [HttpGet]
+    public async Task<IActionResult> ListSales([FromQuery] ListSalesRequest request, CancellationToken cancellationToken)
+    {
+        var validator = new ListSalesRequestValidator();
+        var validationResult = await validator.ValidateAsync(request, cancellationToken);
+
+        if (!validationResult.IsValid)
+            return BadRequest(validationResult.Errors);
+
+        var command = _mapper.Map<ListSalesCommand>(request);
+        var response = await _mediator.Send(command, cancellationToken);
+        var responses = _mapper.Map<SalesResponse[]>(response.Sales);
+
+        var paginatedList = new PaginatedList<SalesResponse>(responses.ToList(), response.salesCount, request.Page, request.Size);
+        return OkPaginated(paginatedList);
     }
 }

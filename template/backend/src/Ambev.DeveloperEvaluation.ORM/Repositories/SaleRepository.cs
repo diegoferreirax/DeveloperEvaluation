@@ -46,6 +46,22 @@ public class SaleRepository : ISaleRepository
     }
 
     /// <summary>
+    /// Retrieves a list of sale 
+    /// </summary>
+    /// <param name="pageSize">Page size of the sales</param>
+    /// <param name="pageNumber">Page number of the sales</param>
+    /// <param name="order">Order of the sales</param>
+    /// <param name="cancellationToken">Cancellation token</param>
+    /// <returns>The sale if found, Maybe otherwise</returns>
+    public async Task<(Sale[], int)> ListSalesAsync(int pageSize, int pageNumber, string order, CancellationToken cancellationToken = default)
+    {
+        // TODO: ajustar order
+        var count = await _context.Sales.CountAsync();
+        var sales = await _context.Sales.Skip((pageNumber - 1) * pageSize).Take(pageSize).OrderBy(o => "SaleNumber").ToArrayAsync().ConfigureAwait(false);
+        return (sales, count);
+    }
+
+    /// <summary>
     /// Check if sale exist by saleNumber
     /// </summary>
     /// <param name="saleNumber">The number of the sale</param>
