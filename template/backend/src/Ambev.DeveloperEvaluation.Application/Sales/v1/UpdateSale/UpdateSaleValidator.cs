@@ -1,4 +1,5 @@
-﻿using FluentValidation;
+﻿using Ambev.DeveloperEvaluation.Domain.Validation;
+using FluentValidation;
 
 namespace Ambev.DeveloperEvaluation.Application.Sales.v1.UpdateSale;
 
@@ -44,7 +45,7 @@ public class UpdateSaleItemCommandValidator : AbstractValidator<UpdateSaleItemCo
     public UpdateSaleItemCommandValidator()
     {
         RuleFor(user => user.ItemId).NotNull().NotEmpty();
-        RuleFor(user => user.Quantity).GreaterThan(0);
+        RuleFor(user => user.Quantity).GreaterThanOrEqualTo(1).LessThanOrEqualTo(ItemValidator.MaxLimitQuantityByItem);
         RuleFor(user => user.Discount).GreaterThanOrEqualTo(0);
     }
 }

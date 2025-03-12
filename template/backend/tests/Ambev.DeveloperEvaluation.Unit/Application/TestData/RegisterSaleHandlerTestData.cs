@@ -1,4 +1,5 @@
 ﻿using Ambev.DeveloperEvaluation.Application.Sales.v1.RegisterSale;
+using Ambev.DeveloperEvaluation.Domain.Validation;
 using Bogus;
 
 namespace Ambev.DeveloperEvaluation.Unit.Application.TestData;
@@ -7,7 +8,7 @@ public static class RegisterSaleHandlerTestData
 {
     private static readonly Faker<RegisterSaleItemCommand> registerSaleItemHandlerFaker = new Faker<RegisterSaleItemCommand>()
         .RuleFor(u => u.ItemId, f => Guid.NewGuid())
-        .RuleFor(u => u.Quantity, f => f.Random.Number(1, 20))
+        .RuleFor(u => u.Quantity, f => f.Random.Number(1, ItemValidator.MaxLimitQuantityByItem))
         .RuleFor(u => u.Discount, f => f.Random.Number(1, 20));
 
     private static readonly Faker<RegisterSaleCommand> registerSaleHandlerFaker = new Faker<RegisterSaleCommand>()

@@ -1,4 +1,5 @@
-﻿using FluentValidation;
+﻿using Ambev.DeveloperEvaluation.Domain.Validation;
+using FluentValidation;
 
 namespace Ambev.DeveloperEvaluation.WebApi.Features.Sales.v1.RegisterSale;
 
@@ -32,6 +33,6 @@ public class RegisterSaleItemRequestValidator : AbstractValidator<RegisterSaleIt
     public RegisterSaleItemRequestValidator()
     {
         RuleFor(user => user.ItemId).NotNull().NotEmpty();
-        RuleFor(user => user.Quantity).GreaterThan(0);
+        RuleFor(user => user.Quantity).GreaterThanOrEqualTo(1).LessThanOrEqualTo(ItemValidator.MaxLimitQuantityByItem);
     }
 }

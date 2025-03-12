@@ -2,6 +2,7 @@
 using Ambev.DeveloperEvaluation.Domain.Entities;
 using Ambev.DeveloperEvaluation.Domain.Events;
 using Ambev.DeveloperEvaluation.Domain.Repositories;
+using Ambev.DeveloperEvaluation.Domain.Services;
 using Ambev.DeveloperEvaluation.Domain.Strategies.Discount;
 using Ambev.DeveloperEvaluation.Domain.Validation;
 using AutoMapper;
@@ -72,13 +73,7 @@ public class RegisterSaleHandler : IRequestHandler<RegisterSaleCommand, Register
                 throw new KeyNotFoundException($"Customer with ID {command.CustomerId} not found");
             }
 
-            // TODO: encapsular regra
-            bool hasItemWithMoreThan20 = command.SaleItens.Any(item => item.Quantity > 20);
-            if (hasItemWithMoreThan20)
-            {
-                throw new InvalidOperationException($"Item quantity is more then 20.");
-            }
-
+            // TODO: talvez armazenar os itens no cache e buscar os preços
             var itemsPrices = await GetItemsPrice(command);
 
             var totalAmount = 0m;
@@ -93,13 +88,13 @@ public class RegisterSaleHandler : IRequestHandler<RegisterSaleCommand, Register
                     item.Discount = discountStrategy.Value.GetPercent();
 
                     var discountedPrice = discountStrategy.Value.GetDiscount(price, item.Quantity);
-                    var totalPriceWithDiscount = CalculateTotalPrice(discountedPrice, item.Quantity);
+                    var totalPriceWithDiscount = CalculationService.CalculateTotalPrice(discountedPrice, item.Quantity);
                     item.SetTotalItemAmount(totalPriceWithDiscount);
                     totalAmount += totalPriceWithDiscount;
                 }
                 else
                 {
-                    var totalPrice = CalculateTotalPrice(price, item.Quantity);
+                    var totalPrice = CalculationService.CalculateTotalPrice(price, item.Quantity);
                     item.SetTotalItemAmount(totalPrice);
                     totalAmount += totalPrice;
                 }
@@ -128,8 +123,7 @@ public class RegisterSaleHandler : IRequestHandler<RegisterSaleCommand, Register
 
             var result = _mapper.Map<RegisterSaleResult>(saleId);
 
-            var publisher = new EventPublisher(new SaleCreatedObserver());
-            await publisher.Notify(result);
+            await SendNotifications(result);
 
             tx.Complete();
             return result;
@@ -138,7 +132,6 @@ public class RegisterSaleHandler : IRequestHandler<RegisterSaleCommand, Register
 
     private async Task<IDictionary<Guid, decimal>> GetItemsPrice(RegisterSaleCommand command)
     {
-        // TODO: talvez armazenar os itens no cache e buscar os preços
         var commandItemsIds = command.SaleItens.Select(i => i.ItemId).ToArray();
         var itemsPrices = (await _itemRepository.GetItemsPriceByIdAsync(commandItemsIds)).Value;
         if (!itemsPrices.Any())
@@ -148,9 +141,9 @@ public class RegisterSaleHandler : IRequestHandler<RegisterSaleCommand, Register
         return itemsPrices;
     }
 
-    private decimal CalculateTotalPrice(decimal price, int quantity)
+    private async Task SendNotifications(RegisterSaleResult saleResult)
     {
-        // TODO: criar um serviço especifico para o calculo
-        return price * quantity;
+        var publisher = new EventPublisher(new SaleCreatedObserver());
+        await publisher.Notify(saleResult);
     }
 }

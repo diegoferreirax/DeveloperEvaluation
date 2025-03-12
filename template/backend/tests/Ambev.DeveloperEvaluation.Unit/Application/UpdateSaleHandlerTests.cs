@@ -1,11 +1,13 @@
 ﻿using Ambev.DeveloperEvaluation.Application.Sales.v1.UpdateSale;
 using Ambev.DeveloperEvaluation.Domain.Entities;
 using Ambev.DeveloperEvaluation.Domain.Repositories;
+using Ambev.DeveloperEvaluation.Domain.Validation;
 using Ambev.DeveloperEvaluation.Unit.Application.TestData;
 using Ambev.DeveloperEvaluation.Unit.Domain.Entities.TestData;
 using AutoMapper;
 using CSharpFunctionalExtensions;
 using FluentAssertions;
+using FluentValidation;
 using NSubstitute;
 using Xunit;
 
@@ -156,24 +158,24 @@ public class UpdateSaleHandlerTests
     }
 
     /// <summary>
-    /// Tests the scenario where the item quantity is invalid (more than 20).
+    /// Tests the scenario where the item quantity is invalid.
     /// Verifies that the update operation throws an InvalidOperationException.
     /// </summary>
-    [Fact(DisplayName = "Given error When item quantity is more than 20 Then returns error response")]
+    [Fact(DisplayName = "Given error When item quantity is more than valid Then returns error response")]
     public async Task Handle_InvalidItemQuantityRequest_ReturnsErrorResponse()
     {
         // Arrange
         var command = UpdateSaleHandlerTestData.GenerateValidCommand();
 
         var commandItems = UpdateSaleHandlerTestData.GenerateValidItemsCommand();
-        commandItems.First().Quantity = 21;
+        commandItems.First().Quantity = ItemValidator.MaxLimitQuantityByItem + 1;
         command.SaleItens = commandItems;
 
         // Act
         Func<Task> act = async () => await _handler.Handle(command, CancellationToken.None);
 
         // Assert
-        await act.Should().ThrowAsync<InvalidOperationException>();
+        await act.Should().ThrowAsync<ValidationException>();
     }
 
     /// <summary>

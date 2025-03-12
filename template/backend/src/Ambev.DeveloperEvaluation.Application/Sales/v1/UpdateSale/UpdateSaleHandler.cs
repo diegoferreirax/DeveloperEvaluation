@@ -2,6 +2,7 @@
 using Ambev.DeveloperEvaluation.Domain.Entities;
 using Ambev.DeveloperEvaluation.Domain.Events;
 using Ambev.DeveloperEvaluation.Domain.Repositories;
+using Ambev.DeveloperEvaluation.Domain.Services;
 using Ambev.DeveloperEvaluation.Domain.Strategies.Discount;
 using AutoMapper;
 using CSharpFunctionalExtensions;
@@ -55,12 +56,6 @@ public class UpdateSaleHandler : IRequestHandler<UpdateSaleCommand, UpdateSaleRe
             if (!validationResult.IsValid)
                 throw new ValidationException(validationResult.Errors);
 
-            bool hasItemWithMoreThan20 = command.SaleItens.Any(item => item.Quantity > 20);
-            if (hasItemWithMoreThan20)
-            {
-                throw new InvalidOperationException($"Item quantity is more then 20.");
-            }
-
             var sale = await _saleRepository.GetByIdWithTrackingAsync(command.Id, cancellationToken);
             if (sale.HasNoValue)
             {
@@ -85,6 +80,7 @@ public class UpdateSaleHandler : IRequestHandler<UpdateSaleCommand, UpdateSaleRe
                 await _saleItemRepository.DeleteAsync(itemsToRemove, cancellationToken);
             }
 
+            // TODO: talvez armazenar os itens no cache e buscar os preços
             var itemsPrices = await GetItemsPrice(command);
 
             var totalAmount = 0m;
@@ -102,13 +98,13 @@ public class UpdateSaleHandler : IRequestHandler<UpdateSaleCommand, UpdateSaleRe
                     updatedItem.Discount = discountStrategy.Value.GetPercent();
 
                     var discountedPrice = discountStrategy.Value.GetDiscount(price, updatedItem.Quantity);
-                    var totalPriceWithDiscount = CalculateTotalPrice(discountedPrice, updatedItem.Quantity);
+                    var totalPriceWithDiscount = CalculationService.CalculateTotalPrice(discountedPrice, updatedItem.Quantity);
                     updatedItem.SetTotalItemAmount(totalPriceWithDiscount);
                     totalAmount += totalPriceWithDiscount;
                 }
                 else
                 {
-                    var totalPrice = CalculateTotalPrice(price, updatedItem.Quantity);
+                    var totalPrice = CalculationService.CalculateTotalPrice(price, updatedItem.Quantity);
                     updatedItem.SetTotalItemAmount(totalPrice);
                     totalAmount += totalPrice;
                 }
@@ -151,16 +147,7 @@ public class UpdateSaleHandler : IRequestHandler<UpdateSaleCommand, UpdateSaleRe
                 await _saleItemRepository.RegisterSaleItensAsync(itemsToAdd.ToArray(), cancellationToken);
             }
 
-            var publisher = new EventPublisher();
-
-            if (saleToUpdate.IsCanceled)
-            {
-                publisher.RegisterObserver(new SaleCancelledObserver());
-                publisher.RegisterObserver(new SaleItemCancelledObserver());
-            }
-
-            publisher.RegisterObserver(new SaleModifiedObserver());
-            await publisher.Notify(saleToUpdate.Id);
+            await SendNotifications(saleToUpdate.Id, saleToUpdate.IsCanceled);
 
             tx.Complete();
             return new UpdateSaleResult();
@@ -169,7 +156,6 @@ public class UpdateSaleHandler : IRequestHandler<UpdateSaleCommand, UpdateSaleRe
 
     private async Task<IDictionary<Guid, decimal>> GetItemsPrice(UpdateSaleCommand command)
     {
-        // TODO: talvez armazenar os itens no cache e buscar os preços
         var commandItemsIds = command.SaleItens.Select(i => i.ItemId).ToArray();
         var itemsPrices = (await _itemRepository.GetItemsPriceByIdAsync(commandItemsIds)).Value;
         if (!itemsPrices.Any())
@@ -179,9 +165,18 @@ public class UpdateSaleHandler : IRequestHandler<UpdateSaleCommand, UpdateSaleRe
         return itemsPrices;
     }
 
-    private decimal CalculateTotalPrice(decimal price, int quantity)
+    private async Task SendNotifications(Guid saleId, bool isCanceled)
     {
-        // TODO: criar um serviço especifico para o calculo
-        return price * quantity;
+        var publisher = new EventPublisher();
+
+        publisher.RegisterObserver(new SaleModifiedObserver());
+
+        if (isCanceled)
+        {
+            publisher.RegisterObserver(new SaleCancelledObserver());
+            publisher.RegisterObserver(new SaleItemCancelledObserver());
+        }
+
+        await publisher.Notify(saleId);
     }
 }

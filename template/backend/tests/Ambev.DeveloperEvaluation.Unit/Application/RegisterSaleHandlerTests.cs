@@ -1,11 +1,13 @@
 ﻿using Ambev.DeveloperEvaluation.Application.Sales.v1.RegisterSale;
 using Ambev.DeveloperEvaluation.Domain.Entities;
 using Ambev.DeveloperEvaluation.Domain.Repositories;
+using Ambev.DeveloperEvaluation.Domain.Validation;
 using Ambev.DeveloperEvaluation.Unit.Application.TestData;
 using Ambev.DeveloperEvaluation.Unit.Domain.Entities.TestData;
 using AutoMapper;
 using CSharpFunctionalExtensions;
 using FluentAssertions;
+using FluentValidation;
 using NSubstitute;
 using Xunit;
 
@@ -140,7 +142,7 @@ public class RegisterSaleHandlerTests
     {
         // Arrange
         var command = RegisterSaleHandlerTestData.GenerateValidCommand();
-        command.SaleItens.First().Quantity = 21;
+        command.SaleItens.First().Quantity = ItemValidator.MaxLimitQuantityByItem + 1;
 
         _saleRepository.GetSaleExistByNumberAsync(Arg.Any<int>(), CancellationToken.None).Returns(false);
         _customerRepository.GetByIdAsync(Arg.Any<Guid>(), CancellationToken.None).Returns(CustomerTestData.GenerateValidCustomer());
@@ -149,6 +151,6 @@ public class RegisterSaleHandlerTests
         Func<Task> act = async () => await _handler.Handle(command, CancellationToken.None);
 
         // Assert
-        await act.Should().ThrowAsync<InvalidOperationException>();
+        await act.Should().ThrowAsync<ValidationException>();
     }
 }
