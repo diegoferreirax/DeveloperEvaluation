@@ -2,7 +2,6 @@
 using Ambev.DeveloperEvaluation.Domain.Entities;
 using Ambev.DeveloperEvaluation.Domain.Events;
 using Ambev.DeveloperEvaluation.Domain.Repositories;
-using Ambev.DeveloperEvaluation.Domain.Services;
 using Ambev.DeveloperEvaluation.Domain.Strategies.Discount;
 using Ambev.DeveloperEvaluation.Domain.Validation;
 using AutoMapper;
@@ -76,28 +75,18 @@ public class RegisterSaleHandler : IRequestHandler<RegisterSaleCommand, Register
             // TODO: talvez armazenar os itens no cache e buscar os preços
             var itemsPrices = await GetItemsPrice(command);
 
+            // TODO: encapsular calculo total amount
             var totalAmount = 0m;
             foreach (var item in command.SaleItens)
             {
                 decimal price;
                 itemsPrices.TryGetValue(item.ItemId, out price);
 
-                var discountStrategy = DiscountFactory.GetDiscountStrategy(item.Quantity);
-                if (discountStrategy.HasValue)
-                {
-                    item.Discount = discountStrategy.Value.GetPercent();
-
-                    var discountedPrice = discountStrategy.Value.GetDiscount(price, item.Quantity);
-                    var totalPriceWithDiscount = CalculationService.CalculateTotalPrice(discountedPrice, item.Quantity);
-                    item.SetTotalItemAmount(totalPriceWithDiscount);
-                    totalAmount += totalPriceWithDiscount;
-                }
-                else
-                {
-                    var totalPrice = CalculationService.CalculateTotalPrice(price, item.Quantity);
-                    item.SetTotalItemAmount(totalPrice);
-                    totalAmount += totalPrice;
-                }
+                var (discountPercent, totalPrice) = DiscountFactory.GetDiscountAndTotalPriceItem(price, item.Quantity);
+                
+                item.Discount = discountPercent;
+                item.SetTotalItemAmount(totalPrice);
+                totalAmount += totalPrice;
             }
 
             var sale = _mapper.Map<Sale>(command);

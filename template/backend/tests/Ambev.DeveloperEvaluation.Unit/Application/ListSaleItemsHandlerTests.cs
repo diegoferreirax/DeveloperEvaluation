@@ -44,7 +44,7 @@ public class ListSaleItemsHandlerTests
         _saleRepository.GetByIdAsync(Arg.Any<Guid>(), CancellationToken.None).Returns(SaleTestData.GenerateValidSale());
 
         var salesItems = SaleItemTestData.GenerateValidSaleItemsList();
-        _saleItemRepository.GetBySaleWithItemIdAsync(Arg.Any<Guid>(), CancellationToken.None).Returns(salesItems);
+        _saleItemRepository.GetBySaleIdAsync(Arg.Any<Guid>(), CancellationToken.None).Returns(salesItems);
 
         var salesResult = GetSalesItemsResult(salesItems);
         _mapper.Map<ListSaleItemsResult[]>(salesItems).Returns(salesResult);

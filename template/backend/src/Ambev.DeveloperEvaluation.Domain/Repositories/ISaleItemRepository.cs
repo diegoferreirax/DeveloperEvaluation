@@ -1,5 +1,4 @@
 using Ambev.DeveloperEvaluation.Domain.Entities;
-using CSharpFunctionalExtensions;
 
 namespace Ambev.DeveloperEvaluation.Domain.Repositories;
 
@@ -38,12 +37,4 @@ public interface ISaleItemRepository
     /// <param name="id">The unique identifier of the saleItem to update</param>
     /// <param name="cancellationToken">Cancellation token</param>
     Task UpdateAsync(SaleItem[] saleItens, CancellationToken cancellationToken = default);
-
-    /// <summary>
-    /// Retrieves a saleItens by their unique identifier
-    /// </summary>
-    /// <param name="id">The unique identifier of the saleItens</param>
-    /// <param name="cancellationToken">Cancellation token</param>
-    /// <returns>The saleItens if found, empty list otherwise</returns>
-    Task<SaleItem[]> GetBySaleWithItemIdAsync(Guid saleId, CancellationToken cancellationToken = default);
 }

@@ -2,7 +2,6 @@
 using Ambev.DeveloperEvaluation.Domain.Entities;
 using Ambev.DeveloperEvaluation.Domain.Events;
 using Ambev.DeveloperEvaluation.Domain.Repositories;
-using Ambev.DeveloperEvaluation.Domain.Services;
 using Ambev.DeveloperEvaluation.Domain.Strategies.Discount;
 using AutoMapper;
 using CSharpFunctionalExtensions;
@@ -62,90 +61,89 @@ public class UpdateSaleHandler : IRequestHandler<UpdateSaleCommand, UpdateSaleRe
                 throw new KeyNotFoundException($"Sale with ID {command.Id} not found");
             }
 
+            var commandItems = command.SaleItens;
+            var commandItemIds = commandItems.Select(i => i.ItemId).ToList();
+
             var saleToUpdate = sale.Value;
-            saleToUpdate.SaleDate = command.SaleDate;
-            saleToUpdate.Branch = command.Branch;
+            var saleItems = await _saleItemRepository.GetBySaleIdAsync(saleToUpdate.Id, cancellationToken);
+            var saleItemsIds = saleItems.Select(i => i.ItemId).ToList();
 
-            // TODO: talvez criar um endpoint para cancelar venda
-            saleToUpdate.IsCanceled = command.IsCanceled;
-
-            var saleItems = (await _saleItemRepository.GetBySaleIdAsync(saleToUpdate.Id, cancellationToken)).ToList();
-
-            var updatedItems = command.SaleItens;
-            var updatedItemIds = updatedItems.Select(i => i.ItemId).ToList();
-
-            var itemsToRemove = saleItems.Where(i => !updatedItemIds.Contains(i.ItemId)).ToArray();
+            #region REMOVE ITEMS
+            var itemsToRemove = saleItems.Where(i => !commandItemIds.Contains(i.ItemId)).ToArray();
             if (itemsToRemove.Length > 0)
             {
                 await _saleItemRepository.DeleteAsync(itemsToRemove, cancellationToken);
             }
+            #endregion
 
-            // TODO: talvez armazenar os itens no cache e buscar os preços
-            var itemsPrices = await GetItemsPrice(command);
-
+            // TODO: encapsular calculo total amount
             var totalAmount = 0m;
-            var itemsToUpdate = new List<SaleItem>();
-            var itemsToAdd = new List<SaleItem>();
 
-            foreach (var updatedItem in updatedItems)
+            #region ADD ITEMS
+            var itemsCommandToAdd = commandItems.Where(i => !saleItemsIds.Contains(i.ItemId)).ToArray();
+            if (itemsCommandToAdd.Length > 0)
             {
-                decimal price;
-                itemsPrices.TryGetValue(updatedItem.ItemId, out price);
+                var itemsToAdd = new List<SaleItem>();
+                var itemsCommandToAddIds = itemsCommandToAdd.Select(i => i.ItemId).ToArray();
+                var itemsCommandPricesToAdd = await GetItemsPrice(itemsCommandToAddIds);
 
-                var discountStrategy = DiscountFactory.GetDiscountStrategy(updatedItem.Quantity);
-                if (discountStrategy.HasValue)
+                foreach (var itemCommandToAdd in itemsCommandToAdd)
                 {
-                    updatedItem.Discount = discountStrategy.Value.GetPercent();
+                    decimal price;
+                    itemsCommandPricesToAdd.TryGetValue(itemCommandToAdd.ItemId, out price);
 
-                    var discountedPrice = discountStrategy.Value.GetDiscount(price, updatedItem.Quantity);
-                    var totalPriceWithDiscount = CalculationService.CalculateTotalPrice(discountedPrice, updatedItem.Quantity);
-                    updatedItem.SetTotalItemAmount(totalPriceWithDiscount);
-                    totalAmount += totalPriceWithDiscount;
-                }
-                else
-                {
-                    var totalPrice = CalculationService.CalculateTotalPrice(price, updatedItem.Quantity);
-                    updatedItem.SetTotalItemAmount(totalPrice);
+                    var (discountPercent, totalPrice) = DiscountFactory.GetDiscountAndTotalPriceItem(price, itemCommandToAdd.Quantity);
+
                     totalAmount += totalPrice;
-                }
 
-                var existingItem = saleItems.FirstOrDefault(i => i.ItemId == updatedItem.ItemId);
-                if (existingItem is not null)
-                {
-                    existingItem.Discount = updatedItem.Discount;
-                    existingItem.Quantity = updatedItem.Quantity;
-                    existingItem.TotalItemAmount = updatedItem.TotalItemAmount;
-                    itemsToUpdate.Add(existingItem);
-                }
-                else
-                {
                     itemsToAdd.Add(new SaleItem
                     {
                         SaleId = saleToUpdate.Id,
                         Sale = saleToUpdate,
 
-                        ItemId = updatedItem.ItemId,
+                        ItemId = itemCommandToAdd.ItemId,
+                        Quantity = itemCommandToAdd.Quantity,
 
-                        Quantity = updatedItem.Quantity,
-                        Discount = updatedItem.Discount,
-                        TotalItemAmount = updatedItem.TotalItemAmount
+                        Discount = discountPercent,
+                        TotalItemAmount = totalPrice
                     });
                 }
-            }
 
-            saleToUpdate.TotalAmount = totalAmount;
-
-            await _saleRepository.UpdateAsync(saleToUpdate, cancellationToken);
-
-            if (itemsToUpdate.Count > 0)
-            {
-                await _saleItemRepository.UpdateAsync(itemsToUpdate.ToArray(), cancellationToken);
-            }
-
-            if (itemsToAdd.Count > 0)
-            {
                 await _saleItemRepository.RegisterSaleItensAsync(itemsToAdd.ToArray(), cancellationToken);
             }
+            #endregion
+
+            #region UPDATE ITEMS
+            var itemsToUpdate = saleItems.Where(i => commandItemIds.Contains(i.ItemId)).ToArray();
+            if (itemsToUpdate.Length > 0)
+            {
+                var itemsPricesToUpdate = await GetItemsPriceInMemory(itemsToUpdate);
+                var itemsCommandToUpdate = commandItems.Where(i => saleItemsIds.Contains(i.ItemId)).ToArray();
+
+                foreach (var itemCommandToUpdate in itemsCommandToUpdate)
+                {
+                    SaleItem price;
+                    itemsPricesToUpdate.TryGetValue(itemCommandToUpdate.ItemId, out price);
+                    price.Quantity = itemCommandToUpdate.Quantity;
+
+                    var (discountPercent, totalPrice) = DiscountFactory.GetDiscountAndTotalPriceItem(price.Item.UnitPrice, price.Quantity);
+
+                    totalAmount += totalPrice;
+                    price.Discount = discountPercent;
+                    price.TotalItemAmount = totalPrice;
+                }
+                await _saleItemRepository.UpdateAsync(itemsToUpdate.ToArray(), cancellationToken);
+            }
+            #endregion
+
+            saleToUpdate.SaleDate = command.SaleDate;
+            saleToUpdate.Branch = command.Branch;
+            saleToUpdate.TotalAmount = totalAmount;
+
+            // TODO: talvez criar um endpoint para cancelar venda
+            saleToUpdate.IsCanceled = command.IsCanceled;
+
+            await _saleRepository.UpdateAsync(saleToUpdate, cancellationToken);
 
             await SendNotifications(saleToUpdate.Id, saleToUpdate.IsCanceled);
 
@@ -154,13 +152,22 @@ public class UpdateSaleHandler : IRequestHandler<UpdateSaleCommand, UpdateSaleRe
         }
     }
 
-    private async Task<IDictionary<Guid, decimal>> GetItemsPrice(UpdateSaleCommand command)
+    private async Task<IDictionary<Guid, decimal>> GetItemsPrice(Guid[] ids)
     {
-        var commandItemsIds = command.SaleItens.Select(i => i.ItemId).ToArray();
-        var itemsPrices = (await _itemRepository.GetItemsPriceByIdAsync(commandItemsIds)).Value;
+        var itemsPrices = (await _itemRepository.GetItemsPriceByIdAsync(ids)).Value;
         if (!itemsPrices.Any())
         {
             throw new KeyNotFoundException($"Items not found");
+        }
+        return itemsPrices;
+    }
+
+    private async Task<IDictionary<Guid, SaleItem>> GetItemsPriceInMemory(SaleItem[] saleItems)
+    {
+        var itemsPrices = new Dictionary<Guid, SaleItem>();
+        foreach (var saleItem in saleItems)
+        {
+            itemsPrices.Add(saleItem.ItemId, saleItem);
         }
         return itemsPrices;
     }
