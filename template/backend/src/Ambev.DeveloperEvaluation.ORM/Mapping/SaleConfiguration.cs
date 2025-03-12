@@ -25,7 +25,6 @@ public class SaleConfiguration : IEntityTypeConfiguration<Sale>
             .HasOne(p => p.Customer)
             .WithMany()
             .HasForeignKey(f => f.CustomerId)
-            .OnDelete(DeleteBehavior.Restrict)
             .IsRequired();
     }
 }

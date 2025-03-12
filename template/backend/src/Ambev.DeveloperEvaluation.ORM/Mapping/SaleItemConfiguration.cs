@@ -30,7 +30,6 @@ public class SaleItemConfiguration : IEntityTypeConfiguration<SaleItem>
             .HasOne(o => o.Item)
             .WithMany()
             .HasForeignKey(f => f.ItemId)
-            .OnDelete(DeleteBehavior.Restrict)
             .IsRequired();
     }
 }

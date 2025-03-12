@@ -15,6 +15,9 @@
 		<PackageReference Include="Microsoft.EntityFrameworkCore.Relational" Version="8.0.10" />
 		<PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="8.0.8" />
 	</ItemGroup>
+  <Target Name="PostBuild_EF" AfterTargets="PostBuildEvent">
+    <Exec Command="dotnet ef migrations script --idempotent --output SQL/Scripts.sql --no-build" IgnoreExitCode="true" />
+  </Target>
 	<ItemGroup>
 		<ProjectReference Include="..\Ambev.DeveloperEvaluation.Domain\Ambev.DeveloperEvaluation.Domain.csproj" />
 	</ItemGroup>
