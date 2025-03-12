@@ -1,86 +1,178 @@
 # Developer Evaluation Project
 
-`READ CAREFULLY`
+Este documento fornece instruções detalhadas para configurar, executar e testar o projeto **Developer Evaluation**.
 
-## Instructions
-**The test below will have up to 7 calendar days to be delivered from the date of receipt of this manual.**
+> **Observação:** Implementação realizada na branch `dev` enquanto o projeto base estava na `main`. Para analisar as modificações realizadas acesse o [Pull Request](https://github.com/diegoferreirax/DeveloperEvaluation/pull/1).
 
-- The code must be versioned in a public Github repository and a link must be sent for evaluation once completed
-- Upload this template to your repository and start working from it
-- Read the instructions carefully and make sure all requirements are being addressed
-- The repository must provide instructions on how to configure, execute and test the project
-- Documentation and overall organization will also be taken into consideration
+## Configuração
 
-## Use Case
-**You are a developer on the DeveloperStore team. Now we need to implement the API prototypes.**
+Para configurar o ambiente de desenvolvimento, siga os passos abaixo:
 
-As we work with `DDD`, to reference entities from other domains, we use the `External Identities` pattern with denormalization of entity descriptions.
+1. **Baixar e instalar o Docker Desktop**
+   - O projeto utiliza Docker para gerenciar os serviços necessários. Certifique-se de baixar e instalar o [Docker Desktop](https://www.docker.com/products/docker-desktop/) conforme o sistema operacional utilizado.
 
-Therefore, you will write an API (complete CRUD) that handles sales records. The API needs to be able to inform:
+2. **Configurar o .NET 8**
+   - Certifique-se de ter o [.NET 8 SDK](https://dotnet.microsoft.com/en-us/download/dotnet/8.0) instalado.
+   - Para verificar a instalação, execute:
+     ```sh
+     dotnet --version
+     ```
 
-* Sale number
-* Date when the sale was made
-* Customer
-* Total sale amount
-* Branch where the sale was made
-* Products
-* Quantities
-* Unit prices
-* Discounts
-* Total amount for each item
-* Cancelled/Not Cancelled
+3. **Baixar o projeto**
+   - Clone o repositório utilizando o comando:
+     ```sh
+     git clone https://github.com/diegoferreirax/DeveloperEvaluation
+     ```
+   - Alternativamente, faça o download do código-fonte manualmente e extraia os arquivos.
 
-It's not mandatory, but it would be a differential to build code for publishing events of:
-* SaleCreated
-* SaleModified
-* SaleCancelled
-* ItemCancelled
+4. **Navegar até o diretório contendo o `docker-compose.yml`**
+   - Acesse o diretório correto onde está localizado o arquivo `docker-compose.yml`:
+     ```sh
+     cd DeveloperEvaluation\template\backend
+     ```
 
-If you write the code, **it's not required** to actually publish to any Message Broker. You can log a message in the application log or however you find most convenient.
+5. **Iniciar os serviços Docker**
+   - Utilize o seguinte comando para iniciar os serviços do Docker:
+     ```sh
+     docker compose -f docker-compose.yml up -d --force-recreate
+     ```
+   - Certifique-se de que todos os containers foram iniciados corretamente com:
+     ```sh
+     docker ps
+     ```
 
-### Business Rules
+6. **Criar o banco de dados (processo pode ser melhorado)**
+   - Após os serviços do docker forem criados e iniciados, é necessário conectar no banco e criar a base de dados `developer_evaluation`.
 
-* Purchases above 4 identical items have a 10% discount
-* Purchases between 10 and 20 identical items have a 20% discount
-* It's not possible to sell above 20 identical items
-* Purchases below 4 items cannot have a discount
+7. **Executar os scripts SQL (processo pode ser melhorado)**
+   - Copie todo o conteúdo do arquivo `scripts.sql` localizado no diretório do projeto Ambev.DeveloperEvaluation.ORM e execute-os na base recém-criada.
 
-These business rules define quantity-based discounting tiers and limitations:
+---
 
-1. Discount Tiers:
-   - 4+ items: 10% discount
-   - 10-20 items: 20% discount
+## Como executar (processo pode ser melhorado)
 
-2. Restrictions:
-   - Maximum limit: 20 items per product
-   - No discounts allowed for quantities below 4 items
+1. **Entrar no diretório do projeto Web API**
+   - Navegue até o diretório onde o código da Web API está localizado:
+     ```sh
+     cd src\Ambev.DeveloperEvaluation.WebApi
+     ```
 
-## Overview
-This section provides a high-level overview of the project and the various skills and competencies it aims to assess for developer candidates. 
+2. **Compilar e executar a aplicação**
+   - Execute os seguintes comandos para compilar e rodar a aplicação:
+     ```sh
+     dotnet build
+     dotnet run
+     ```
 
-See [Overview](/.doc/overview.md)
+3. **Acessar a aplicação**
+   - A API estará disponível na porta `5119`. Acesse pelo navegador ou ferramenta de teste HTTP:
+     ```
+     http://localhost:5119/swagger
+     ```
 
-## Tech Stack
-This section lists the key technologies used in the project, including the backend, testing, frontend, and database components. 
+---
 
-See [Tech Stack](/.doc/tech-stack.md)
 
-## Frameworks
-This section outlines the frameworks and libraries that are leveraged in the project to enhance development productivity and maintainability. 
 
-See [Frameworks](/.doc/frameworks.md)
+## Testando o projeto
 
-<!-- 
-## API Structure
-This section includes links to the detailed documentation for the different API resources:
-- [API General](./docs/general-api.md)
-- [Products API](/.doc/products-api.md)
-- [Carts API](/.doc/carts-api.md)
-- [Users API](/.doc/users-api.md)
-- [Auth API](/.doc/auth-api.md)
--->
+Para garantir o correto funcionamento da API, os seguintes endpoints podem ser testados:
 
-## Project Structure
-This section describes the overall structure and organization of the project files and directories. 
+1. **Registrar uma nova venda (`api/v1/sales`)**
+   - Método: `POST`
+   - Enviar um objeto JSON no corpo da requisição.
+   - Exemplo de requisição:
+     ```json
+     {
+       "customerId": "3b765f33-6d77-4da6-906f-511b1e2d009d",
+       "saleNumber": 1,
+       "saleDate": "2025-03-07T21:31:55",
+       "isCanceled": false,
+       "branch": "Filial 1",
+       "saleItens": [
+         { "itemId": "2ccb7715-03fc-447f-9632-73a8a8bcc816", "quantity": 2 },
+         { "itemId": "5818a8f0-cd7c-4a5e-a7f2-a99507e9260d", "quantity": 1 }
+       ]
+     }
+     ```
 
-See [Project Structure](/.doc/project-structure.md)
+2. **Atualizar uma venda (`api/v1/sales`)**
+   - Método: `PUT`
+   - Enviar um objeto JSON atualizado no corpo da requisição.
+   - Exemplo de requisição:
+     ```json
+     {
+       "id": "3b765f33-6d77-4da6-906f-511b1e2d009d",
+       "saleDate": "2025-03-07T21:31:55",
+       "isCanceled": false,
+       "branch": "Filial 1",
+       "saleItens": [
+         { "itemId": "2ccb7715-03fc-447f-9632-73a8a8bcc816", "quantity": 2 },
+         { "itemId": "5818a8f0-cd7c-4a5e-a7f2-a99507e9260d", "quantity": 1 }
+       ]
+     }
+     ```
+
+3. **Deletar uma venda (`api/v1/sales/{saleId}`)**
+   - Método: `DELETE`
+   - Informar o `saleId` na rota.
+   - Exemplo de requisição:
+     ```sh
+     DELETE http://localhost:5119/api/v1/sales/{saleId}
+     ```
+
+4. **Listar vendas (`api/v1/sales`)**
+   - Método: `GET`
+   - Aceita parâmetros de consulta: `page`, `size`, `order`, `descending`.
+   - Exemplo de requisição:
+     ```sh
+     GET http://localhost:5119/api/v1/sales?page=1&size=10&order=date&descending=true
+     ```
+   - Exemplo de response:
+     ```json
+      [
+         {
+            "id": "3b765f33-6d77-4da6-906f-511b1e2d009d",
+            "customerId": "3b765f33-6d77-4da6-906f-511b1e2d009d",
+            "saleDate": "2025-03-07T21:31:55",
+            "isCanceled": false,
+            "branch": "Filial 1",
+            "totalAmount": 89.99
+         }
+      ]
+     ```
+
+5. **Listar itens de uma venda (`api/v1/sales/{saleId}/items`)**
+   - Método: `GET`
+   - Informar o `saleId` na rota para obter os itens de uma venda específica.
+   - Exemplo de requisição:
+     ```sh
+     GET http://localhost:5119/api/v1/sales/{saleId}/items
+     ```
+   - Exemplo de response:
+     ```json
+      [
+         {
+            "itemId": "3b765f33-6d77-4da6-906f-511b1e2d009d",
+            "quantity": 2,
+            "discount": 0,
+            "totalItemAmount": 10,
+            "item": {
+               "product": "Brahma",
+               "unitPrice": 5
+            }
+         },
+         {
+            "itemId": "5c765f33-6d77-4da6-906f-511b1e2d009d",
+            "quantity": 3,
+            "discount": 0,
+            "totalItemAmount": 15,
+            "item": {
+               "product": "Skol",
+               "unitPrice": 5
+            }
+         }
+      ]
+     ```
+
+---
