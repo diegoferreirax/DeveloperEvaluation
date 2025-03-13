@@ -12,7 +12,7 @@ public record ListSalesResult
     /// <summary>
     /// Gets the list of sales, where each sale provides detailed information about a particular sale transaction.
     /// </summary>
-    SalesResult[] Sales
+    IEnumerable<SalesResult> Sales
 );
 
 /// <summary>

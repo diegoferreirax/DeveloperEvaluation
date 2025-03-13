@@ -108,7 +108,7 @@ public class RegisterSaleHandler : IRequestHandler<RegisterSaleCommand, Register
 
                 saleItens.Add(saleItem);
             }
-            await _saleItemRepository.RegisterSaleItensAsync(saleItens.ToArray(), cancellationToken);
+            await _saleItemRepository.RegisterSaleItensAsync(saleItens, cancellationToken);
 
             var result = _mapper.Map<RegisterSaleResult>(saleId);
 
@@ -121,7 +121,7 @@ public class RegisterSaleHandler : IRequestHandler<RegisterSaleCommand, Register
 
     private async Task<IDictionary<Guid, decimal>> GetItemsPrice(RegisterSaleCommand command)
     {
-        var commandItemsIds = command.SaleItens.Select(i => i.ItemId).ToArray();
+        var commandItemsIds = command.SaleItens.Select(i => i.ItemId);
         var itemsPrices = (await _itemRepository.GetItemsPriceByIdAsync(commandItemsIds)).Value;
         if (!itemsPrices.Any())
         {

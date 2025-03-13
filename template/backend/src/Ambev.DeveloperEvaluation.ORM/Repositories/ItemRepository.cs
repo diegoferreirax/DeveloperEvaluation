@@ -26,7 +26,7 @@ public class ItemRepository : IItemRepository
     /// <param name="saleItems">Sale itens to get prices</param>
     /// <param name="cancellationToken">Cancellation token</param>
     /// <returns>The dictionary of Ids and prices if found, Maybe.None otherwise</returns>
-    public async Task<Maybe<IDictionary<Guid, decimal>>> GetItemsPriceByIdAsync(Guid[] saleItemsIds, CancellationToken cancellationToken = default)
+    public async Task<Maybe<IDictionary<Guid, decimal>>> GetItemsPriceByIdAsync(IEnumerable<Guid> saleItemsIds, CancellationToken cancellationToken = default)
     {
         // TODO: ver se há mais alguma opção de busca ao inves de ANY/IN internamente
         return await _context.Items.Where(i => saleItemsIds.Contains(i.Id)).ToDictionaryAsync(i => i.Id, i => i.UnitPrice).ConfigureAwait(false);

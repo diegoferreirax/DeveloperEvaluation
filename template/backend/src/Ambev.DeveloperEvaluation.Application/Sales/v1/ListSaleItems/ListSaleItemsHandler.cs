@@ -47,7 +47,7 @@ public class ListSaleItemsHandler : IRequestHandler<ListSaleItemsCommand, ListIt
 
         // TODO: verificar necessidade de paginação
         var saleItems = await _saleItemRepository.GetBySaleIdAsync(command.Id);
-        var itemsResult = _mapper.Map<ListSaleItemsResult[]>(saleItems);
+        var itemsResult = _mapper.Map<IEnumerable<ListSaleItemsResult>>(saleItems);
 
         return new ListItemsResult(itemsResult);
     }

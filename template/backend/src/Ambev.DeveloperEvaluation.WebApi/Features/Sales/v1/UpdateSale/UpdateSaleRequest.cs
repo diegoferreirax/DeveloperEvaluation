@@ -14,7 +14,7 @@ public record UpdateSaleRequest
     DateTime SaleDate,
     bool IsCanceled,
     string Branch,
-    UpdateSaleItemRequest[] SaleItens
+    IEnumerable<UpdateSaleItemRequest> SaleItens
 );
 
 /// <summary>

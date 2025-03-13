@@ -62,15 +62,15 @@ public class UpdateSaleHandler : IRequestHandler<UpdateSaleCommand, UpdateSaleRe
             }
 
             var commandItems = command.SaleItens;
-            var commandItemIds = commandItems.Select(i => i.ItemId).ToList();
+            var commandItemIds = commandItems.Select(i => i.ItemId);
 
             var saleToUpdate = sale.Value;
             var saleItems = await _saleItemRepository.GetBySaleIdAsync(saleToUpdate.Id, cancellationToken);
-            var saleItemsIds = saleItems.Select(i => i.ItemId).ToList();
+            var saleItemsIds = saleItems.Select(i => i.ItemId);
 
             #region REMOVE ITEMS
-            var itemsToRemove = saleItems.Where(i => !commandItemIds.Contains(i.ItemId)).ToArray();
-            if (itemsToRemove.Length > 0)
+            var itemsToRemove = saleItems.Where(i => !commandItemIds.Contains(i.ItemId));
+            if (itemsToRemove.Any())
             {
                 await _saleItemRepository.DeleteAsync(itemsToRemove, cancellationToken);
             }
@@ -80,11 +80,11 @@ public class UpdateSaleHandler : IRequestHandler<UpdateSaleCommand, UpdateSaleRe
             var totalAmount = 0m;
 
             #region ADD ITEMS
-            var itemsCommandToAdd = commandItems.Where(i => !saleItemsIds.Contains(i.ItemId)).ToArray();
-            if (itemsCommandToAdd.Length > 0)
+            var itemsCommandToAdd = commandItems.Where(i => !saleItemsIds.Contains(i.ItemId));
+            if (itemsCommandToAdd.Any())
             {
                 var itemsToAdd = new List<SaleItem>();
-                var itemsCommandToAddIds = itemsCommandToAdd.Select(i => i.ItemId).ToArray();
+                var itemsCommandToAddIds = itemsCommandToAdd.Select(i => i.ItemId);
                 var itemsCommandPricesToAdd = await GetItemsPrice(itemsCommandToAddIds);
 
                 foreach (var itemCommandToAdd in itemsCommandToAdd)
@@ -109,16 +109,16 @@ public class UpdateSaleHandler : IRequestHandler<UpdateSaleCommand, UpdateSaleRe
                     });
                 }
 
-                await _saleItemRepository.RegisterSaleItensAsync(itemsToAdd.ToArray(), cancellationToken);
+                await _saleItemRepository.RegisterSaleItensAsync(itemsToAdd, cancellationToken);
             }
             #endregion
 
             #region UPDATE ITEMS
-            var itemsToUpdate = saleItems.Where(i => commandItemIds.Contains(i.ItemId)).ToArray();
-            if (itemsToUpdate.Length > 0)
+            var itemsToUpdate = saleItems.Where(i => commandItemIds.Contains(i.ItemId));
+            if (itemsToUpdate.Any())
             {
                 var itemsPricesToUpdate = await GetItemsPriceInMemory(itemsToUpdate);
-                var itemsCommandToUpdate = commandItems.Where(i => saleItemsIds.Contains(i.ItemId)).ToArray();
+                var itemsCommandToUpdate = commandItems.Where(i => saleItemsIds.Contains(i.ItemId));
 
                 foreach (var itemCommandToUpdate in itemsCommandToUpdate)
                 {
@@ -132,7 +132,7 @@ public class UpdateSaleHandler : IRequestHandler<UpdateSaleCommand, UpdateSaleRe
                     price.Discount = discountPercent;
                     price.TotalItemAmount = totalPrice;
                 }
-                await _saleItemRepository.UpdateAsync(itemsToUpdate.ToArray(), cancellationToken);
+                await _saleItemRepository.UpdateAsync(itemsToUpdate, cancellationToken);
             }
             #endregion
 
@@ -152,7 +152,7 @@ public class UpdateSaleHandler : IRequestHandler<UpdateSaleCommand, UpdateSaleRe
         }
     }
 
-    private async Task<IDictionary<Guid, decimal>> GetItemsPrice(Guid[] ids)
+    private async Task<IDictionary<Guid, decimal>> GetItemsPrice(IEnumerable<Guid> ids)
     {
         var itemsPrices = (await _itemRepository.GetItemsPriceByIdAsync(ids)).Value;
         if (!itemsPrices.Any())
@@ -162,7 +162,7 @@ public class UpdateSaleHandler : IRequestHandler<UpdateSaleCommand, UpdateSaleRe
         return itemsPrices;
     }
 
-    private async Task<IDictionary<Guid, SaleItem>> GetItemsPriceInMemory(SaleItem[] saleItems)
+    private async Task<IDictionary<Guid, SaleItem>> GetItemsPriceInMemory(IEnumerable<SaleItem> saleItems)
     {
         var itemsPrices = new Dictionary<Guid, SaleItem>();
         foreach (var saleItem in saleItems)

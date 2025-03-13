@@ -15,12 +15,12 @@ public static class ItemTestData
         return ItemFaker.Generate();
     }
 
-    public static Item[] GenerateValidItemsList()
+    public static IEnumerable<Item> GenerateValidItemsList()
     {
         return new List<Item> ()
         {
             ItemFaker.Generate(),
             ItemFaker.Generate()
-        }.ToArray();
+        };
     }
 }

@@ -50,33 +50,32 @@ public class UpdateSaleHandlerTests
         var sale = SaleTestData.GenerateValidSale();
         sale.Id = command.Id;
 
-        var commandItems = new List<UpdateSaleItemCommand>()
+        command.SaleItens = new List<UpdateSaleItemCommand>()
         {
             UpdateSaleHandlerTestData.GenerateValidItemCommand(),
             UpdateSaleHandlerTestData.GenerateValidItemCommand()
         };
-        command.SaleItens = commandItems.ToArray();
 
         var itemsPrices = new Dictionary<Guid, decimal>();
-        var saleItems = command.SaleItens.Select(i =>
+        foreach (var item in command.SaleItens)
         {
-            var saleItem = SaleItemTestData.GenerateValidSaleItem();
-            saleItem.ItemId = i.ItemId;
+            itemsPrices.Add(item.ItemId, 10m);
+        }
 
-            itemsPrices.Add(saleItem.ItemId, 10m);
-            return saleItem;
-        });
+        var sameSale = SaleItemTestData.GenerateValidSaleItem();
+        sameSale.ItemId = command.SaleItens.First().ItemId;
+        var saleItems = new List<SaleItem>() { sameSale };
 
         _saleRepository.GetByIdWithTrackingAsync(Arg.Any<Guid>(), CancellationToken.None).Returns(sale);
-        _saleItemRepository.GetBySaleIdAsync(Arg.Any<Guid>(), CancellationToken.None).Returns(saleItems.ToArray());
-        _itemRepository.GetItemsPriceByIdAsync(Arg.Any<Guid[]>(), CancellationToken.None).Returns(itemsPrices);
+        _saleItemRepository.GetBySaleIdAsync(Arg.Any<Guid>(), CancellationToken.None).Returns(saleItems);
+        _itemRepository.GetItemsPriceByIdAsync(Arg.Any<IEnumerable<Guid>>(), CancellationToken.None).Returns(itemsPrices);
 
         // Act
         var updateSaleResult = await _handler.Handle(command, CancellationToken.None);
 
         // Assert
         await _saleRepository.Received(1).UpdateAsync(Arg.Any<Sale>(), Arg.Any<CancellationToken>());
-        await _saleItemRepository.Received(1).UpdateAsync(Arg.Any<SaleItem[]>(), Arg.Any<CancellationToken>());
+        await _saleItemRepository.Received(1).UpdateAsync(Arg.Any<IEnumerable<SaleItem>>(), Arg.Any<CancellationToken>());
     }
 
     /// <summary>
@@ -95,7 +94,7 @@ public class UpdateSaleHandlerTests
         {
             UpdateSaleHandlerTestData.GenerateValidItemCommand(),
             UpdateSaleHandlerTestData.GenerateValidItemCommand()
-        }.ToArray();
+        };
 
         var saleItem1 = SaleItemTestData.GenerateValidSaleItem();
         saleItem1.ItemId = command.SaleItens.First().ItemId;
@@ -105,16 +104,16 @@ public class UpdateSaleHandlerTests
         itemsPrices.Add(command.SaleItens.First().ItemId, 10m);
 
         _saleRepository.GetByIdWithTrackingAsync(Arg.Any<Guid>(), CancellationToken.None).Returns(sale);
-        _saleItemRepository.GetBySaleIdAsync(Arg.Any<Guid>(), CancellationToken.None).Returns(saleItems.ToArray());
-        _itemRepository.GetItemsPriceByIdAsync(Arg.Any<Guid[]>(), CancellationToken.None).Returns(itemsPrices);
+        _saleItemRepository.GetBySaleIdAsync(Arg.Any<Guid>(), CancellationToken.None).Returns(saleItems);
+        _itemRepository.GetItemsPriceByIdAsync(Arg.Any<IEnumerable<Guid>>(), CancellationToken.None).Returns(itemsPrices);
 
         // Act
         var updateSaleResult = await _handler.Handle(command, CancellationToken.None);
 
         // Assert
         await _saleRepository.Received(1).UpdateAsync(Arg.Any<Sale>(), Arg.Any<CancellationToken>());
-        await _saleItemRepository.Received(1).UpdateAsync(Arg.Any<SaleItem[]>(), Arg.Any<CancellationToken>());
-        await _saleItemRepository.Received(1).RegisterSaleItensAsync(Arg.Any<SaleItem[]>(), Arg.Any<CancellationToken>());
+        await _saleItemRepository.Received(1).UpdateAsync(Arg.Any<IEnumerable<SaleItem>>(), Arg.Any<CancellationToken>());
+        await _saleItemRepository.Received(1).RegisterSaleItensAsync(Arg.Any<IEnumerable<SaleItem>>(), Arg.Any<CancellationToken>());
     }
 
     /// <summary>
@@ -139,22 +138,22 @@ public class UpdateSaleHandlerTests
         var commandItem1 = UpdateSaleHandlerTestData.GenerateValidItemCommand();
         commandItem1.ItemId = saleItems.First().ItemId;
         var commandItems = new List<UpdateSaleItemCommand>() { commandItem1 };
-        command.SaleItens = commandItems.ToArray();
+        command.SaleItens = commandItems;
 
         var itemsPrices = new Dictionary<Guid, decimal>();
         itemsPrices.Add(saleItems.First().ItemId, 10m);
 
         _saleRepository.GetByIdWithTrackingAsync(Arg.Any<Guid>(), CancellationToken.None).Returns(sale);
-        _saleItemRepository.GetBySaleIdAsync(Arg.Any<Guid>(), CancellationToken.None).Returns(saleItems.ToArray());
-        _itemRepository.GetItemsPriceByIdAsync(Arg.Any<Guid[]>(), CancellationToken.None).Returns(itemsPrices);
+        _saleItemRepository.GetBySaleIdAsync(Arg.Any<Guid>(), CancellationToken.None).Returns(saleItems);
+        _itemRepository.GetItemsPriceByIdAsync(Arg.Any<IEnumerable<Guid>>(), CancellationToken.None).Returns(itemsPrices);
 
         // Act
         var updateSaleResult = await _handler.Handle(command, CancellationToken.None);
 
         // Assert
         await _saleRepository.Received(1).UpdateAsync(Arg.Any<Sale>(), Arg.Any<CancellationToken>());
-        await _saleItemRepository.Received(1).UpdateAsync(Arg.Any<SaleItem[]>(), Arg.Any<CancellationToken>());
-        await _saleItemRepository.Received(1).DeleteAsync(Arg.Any<SaleItem[]>(), Arg.Any<CancellationToken>());
+        await _saleItemRepository.Received(1).UpdateAsync(Arg.Any<IEnumerable<SaleItem>>(), Arg.Any<CancellationToken>());
+        await _saleItemRepository.Received(1).DeleteAsync(Arg.Any<IEnumerable<SaleItem>>(), Arg.Any<CancellationToken>());
     }
 
     /// <summary>

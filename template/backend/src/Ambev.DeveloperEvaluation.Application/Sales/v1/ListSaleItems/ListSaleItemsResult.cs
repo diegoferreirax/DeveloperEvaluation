@@ -6,7 +6,7 @@
 /// </summary>
 public record ListItemsResult
 (
-    ListSaleItemsResult[] Items
+    IEnumerable<ListSaleItemsResult> Items
 );
 
 /// <summary>

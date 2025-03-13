@@ -7,7 +7,7 @@ public record ListSalesResponse
     /// <summary>
     /// Gets the list of sales, where each sale provides detailed information about a particular sale transaction.
     /// </summary>
-    SalesResponse[] Sales
+    IEnumerable<SalesResponse> Sales
 );
 
 /// <summary>

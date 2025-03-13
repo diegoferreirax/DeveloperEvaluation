@@ -6,7 +6,7 @@
 /// <param name="Id">The unique identifier of the sale.</param>
 public record ListItemsResponse
 (
-    ListSaleItemsResponse[] Items
+    IEnumerable<ListSaleItemsResponse> Items
 );
 
 /// <summary>
