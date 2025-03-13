@@ -21,7 +21,7 @@ public static class RegisterSaleHandlerTestData
         { 
             registerSaleItemHandlerFaker,
             registerSaleItemHandlerFaker
-        }.ToArray());
+        });
 
     public static RegisterSaleCommand GenerateValidCommand()
     {

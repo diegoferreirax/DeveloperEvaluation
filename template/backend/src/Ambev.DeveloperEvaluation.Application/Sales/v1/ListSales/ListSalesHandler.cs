@@ -41,7 +41,7 @@ public class ListSalesHandler : IRequestHandler<ListSalesCommand, ListSalesResul
         var salesResult = new ListSalesResult
         (
             count,
-            _mapper.Map<SalesResult[]>(sales)
+            _mapper.Map<IEnumerable<SalesResult>>(sales)
         );
 
         return salesResult;

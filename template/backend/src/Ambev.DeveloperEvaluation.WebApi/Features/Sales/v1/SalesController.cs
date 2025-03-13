@@ -136,7 +136,7 @@ public class SalesController : BaseController
 
         var command = _mapper.Map<ListSalesCommand>(request);
         var response = await _mediator.Send(command, cancellationToken);
-        var responses = _mapper.Map<SalesResponse[]>(response.Sales);
+        var responses = _mapper.Map<IEnumerable<SalesResponse>>(response.Sales);
 
         var paginatedList = new PaginatedList<SalesResponse>(responses.ToList(), response.salesCount, request.Page, request.Size);
         return OkPaginated(paginatedList);
@@ -164,7 +164,7 @@ public class SalesController : BaseController
         var command = _mapper.Map<ListSaleItemsCommand>(request);
         var response = await _mediator.Send(command, cancellationToken);
 
-        var items = _mapper.Map<ListSaleItemsResponse[]>(response.Items);
+        var items = _mapper.Map<IEnumerable<ListSaleItemsResponse>>(response.Items);
 
         return Ok(new ListItemsResponse(items));
     }

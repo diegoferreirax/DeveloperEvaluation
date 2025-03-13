@@ -14,5 +14,5 @@ public interface IItemRepository
     /// <param name="saleItems">Sale itens to get prices</param>
     /// <param name="cancellationToken">Cancellation token</param>
     /// <returns>The sale if found, Maybe.None otherwise</returns>
-    Task<Maybe<IDictionary<Guid, decimal>>> GetItemsPriceByIdAsync(Guid[] saleItemsIds, CancellationToken cancellationToken = default);
+    Task<Maybe<IDictionary<Guid, decimal>>> GetItemsPriceByIdAsync(IEnumerable<Guid> saleItemsIds, CancellationToken cancellationToken = default);
 }

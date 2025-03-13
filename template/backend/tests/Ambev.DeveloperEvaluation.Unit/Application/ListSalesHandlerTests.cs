@@ -42,13 +42,13 @@ public class ListSalesHandlerTests
         {
             SaleTestData.GenerateValidSale(),
             SaleTestData.GenerateValidSale()
-        }.ToArray();
+        };
 
-        (Sale[], int) result = (sales, sales.Length);
+        (IEnumerable<Sale>, int) result = (sales, sales.Count);
         _saleRepository.ListSalesAsync(Arg.Any<int>(), Arg.Any<int>(), Arg.Any<string>(), Arg.Any<bool>(), CancellationToken.None).Returns(result);
 
         var salesResult = GetSalesResult(sales);
-        _mapper.Map<SalesResult[]>(sales).Returns(salesResult);
+        _mapper.Map<IEnumerable<SalesResult>>(sales).Returns(salesResult);
 
         // Act
         var listSalesResult = await _handler.Handle(command, CancellationToken.None);
@@ -57,8 +57,8 @@ public class ListSalesHandlerTests
         listSalesResult.Should().NotBeNull();
     }
 
-    private SalesResult[] GetSalesResult(Sale[] sales)
+    private IEnumerable<SalesResult> GetSalesResult(IEnumerable<Sale> sales)
     {
-        return sales.Select(s => _mapper.Map<SalesResult>(s)).ToArray();
+        return sales.Select(s => _mapper.Map<SalesResult>(s));
     }
 }

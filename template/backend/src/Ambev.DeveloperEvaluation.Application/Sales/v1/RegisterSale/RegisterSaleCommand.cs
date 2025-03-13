@@ -37,7 +37,7 @@ public class RegisterSaleCommand : IRequest<RegisterSaleResult>
     /// <summary>
     /// List of sale items.
     /// </summary>
-    public RegisterSaleItemCommand[] SaleItens { get; set; }
+    public IEnumerable<RegisterSaleItemCommand> SaleItens { get; set; }
 
     public ValidationResultDetail Validate()
     {

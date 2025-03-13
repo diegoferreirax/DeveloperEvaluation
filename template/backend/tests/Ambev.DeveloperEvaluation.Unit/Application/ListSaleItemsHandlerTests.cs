@@ -47,7 +47,7 @@ public class ListSaleItemsHandlerTests
         _saleItemRepository.GetBySaleIdAsync(Arg.Any<Guid>(), CancellationToken.None).Returns(salesItems);
 
         var salesResult = GetSalesItemsResult(salesItems);
-        _mapper.Map<ListSaleItemsResult[]>(salesItems).Returns(salesResult);
+        _mapper.Map<IEnumerable<ListSaleItemsResult>>(salesItems).Returns(salesResult);
 
         // Act
         var listSalesResult = await _handler.Handle(command, CancellationToken.None);
@@ -74,8 +74,8 @@ public class ListSaleItemsHandlerTests
         await act.Should().ThrowAsync<KeyNotFoundException>();
     }
 
-    private ListSaleItemsResult[] GetSalesItemsResult(SaleItem[] saleItems)
+    private IEnumerable<ListSaleItemsResult> GetSalesItemsResult(IEnumerable<SaleItem> saleItems)
     {
-        return saleItems.Select(s => _mapper.Map<ListSaleItemsResult>(s)).ToArray();
+        return saleItems.Select(s => _mapper.Map<ListSaleItemsResult>(s));
     }
 }

@@ -32,7 +32,7 @@ public class UpdateSaleCommand : IRequest<UpdateSaleResult>
     /// <summary>
     /// List of sale items.
     /// </summary>
-    public UpdateSaleItemCommand[] SaleItens { get; set; }
+    public IEnumerable<UpdateSaleItemCommand> SaleItens { get; set; }
 
     public ValidationResultDetail Validate()
     {

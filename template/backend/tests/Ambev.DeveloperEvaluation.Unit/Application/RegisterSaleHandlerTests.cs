@@ -82,7 +82,7 @@ public class RegisterSaleHandlerTests
             });
         }
 
-        _itemRepository.GetItemsPriceByIdAsync(Arg.Any<Guid[]>(), CancellationToken.None).Returns(itemsPrices);
+        _itemRepository.GetItemsPriceByIdAsync(Arg.Any<IEnumerable<Guid>>(), CancellationToken.None).Returns(itemsPrices);
 
         _mapper.Map<Sale>(command).Returns(sale);
         _mapper.Map<RegisterSaleResult>(saleId).Returns(new RegisterSaleResult(saleId));
@@ -94,7 +94,7 @@ public class RegisterSaleHandlerTests
         registerSaleResult.Should().NotBeNull();
         registerSaleResult.id.Should().Be(sale.Id);
         await _saleRepository.Received(1).RegisterSaleAsync(Arg.Any<Sale>(), Arg.Any<CancellationToken>());
-        await _saleItemRepository.Received(1).RegisterSaleItensAsync(Arg.Any<SaleItem[]>(), Arg.Any<CancellationToken>());
+        await _saleItemRepository.Received(1).RegisterSaleItensAsync(Arg.Any<IEnumerable<SaleItem>>(), Arg.Any<CancellationToken>());
     }
 
     /// <summary>

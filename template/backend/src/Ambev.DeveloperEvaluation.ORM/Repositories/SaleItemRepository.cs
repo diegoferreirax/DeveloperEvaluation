@@ -27,7 +27,7 @@ public class SaleItemRepository : ISaleItemRepository
     /// <param name="saleItens">The saleItens to register</param>
     /// <param name="cancellationToken">Cancellation token</param>
     /// <returns>The registered saleItens</returns>
-    public async Task RegisterSaleItensAsync(SaleItem[] saleItens, CancellationToken cancellationToken = default)
+    public async Task RegisterSaleItensAsync(IEnumerable<SaleItem> saleItens, CancellationToken cancellationToken = default)
     {
         await _context.SaleItens.AddRangeAsync(saleItens, cancellationToken);
         await _context.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
@@ -38,7 +38,7 @@ public class SaleItemRepository : ISaleItemRepository
     /// </summary>
     /// <param name="id">The unique identifier of the saleItem to update</param>
     /// <param name="cancellationToken">Cancellation token</param>
-    public async Task UpdateAsync(SaleItem[] saleItens, CancellationToken cancellationToken = default)
+    public async Task UpdateAsync(IEnumerable<SaleItem> saleItens, CancellationToken cancellationToken = default)
     {
         _context.SaleItens.UpdateRange(saleItens);
         await _context.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
@@ -50,7 +50,7 @@ public class SaleItemRepository : ISaleItemRepository
     /// <param name="id">The unique identifier of the saleItens to delete</param>
     /// <param name="cancellationToken">Cancellation token</param>
     /// <returns>True if the saleItens was deleted, false if not found</returns>
-    public async Task DeleteAsync(SaleItem[] saleItems, CancellationToken cancellationToken = default)
+    public async Task DeleteAsync(IEnumerable<SaleItem> saleItems, CancellationToken cancellationToken = default)
     {
         _context.SaleItens.RemoveRange(saleItems);
         await _context.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
@@ -62,7 +62,7 @@ public class SaleItemRepository : ISaleItemRepository
     /// <param name="id">The unique identifier of the saleItens</param>
     /// <param name="cancellationToken">Cancellation token</param>
     /// <returns>The saleItens if found, empty list otherwise</returns>
-    public async Task<SaleItem[]> GetBySaleIdAsync(Guid saleId, CancellationToken cancellationToken = default)
+    public async Task<IEnumerable<SaleItem>> GetBySaleIdAsync(Guid saleId, CancellationToken cancellationToken = default)
     {
         return await _context.SaleItens.Include("Item").AsNoTracking().Where(s => s.SaleId == saleId).ToArrayAsync().ConfigureAwait(false);
     }
